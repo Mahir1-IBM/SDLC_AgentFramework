@@ -5,3 +5,6 @@ langchain-openai
 langchain
 langchain-community
 ibm_docx_parser-1.3-py3-none-any.whl
+pyautogen[long-context]
+PyMuPDF
+python-dotenv

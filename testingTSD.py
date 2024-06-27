@@ -1,0 +1,70 @@
+import warnings
+
+from typing_extensions import Annotated
+from autogen import ConversableAgent, config_list_from_json, AssistantAgent
+warnings.filterwarnings("ignore")
+
+config_list = config_list_from_json(
+    env_or_file = "OAI_CONFIG_LIST.json"
+)
+
+llm_config = {
+    "config_list" : config_list, 
+    "timeout" : 120
+}
+
+def testing(
+        data : Annotated[str, "TSD data that needs to be verified."],
+    ) -> str:
+    Tester = AssistantAgent(
+        name="Agent_to_verify_TSD",
+        system_message=f"""You are a very skilled AI agent. Check the {data} generated with the following parameters:
+            1. Check for Description and Purpose Section, content should be available within this section.
+            2. Check for Existing Assumptions, content should be available within this section.
+            3. Check for Selection Screen, content should be available within this section.
+            4. Check for Technical Details sections, within this section you should check for below things:
+                - Main Statement of Reports
+                - Key requirements
+                - Relevant Data Fields
+                - Data Sources
+                - SAP Tools
+                - Report output fields
+                - Function names and class names
+                - Important functionalities
+                - Custom table design
+                - Custom CDS Views, tables, classes, methods, and functions
+                - Technical implementation steps.
+                - Technical implementation steps should strictly exclude generic sections Error Handling, Testing, Selection screen, Documentation, Conclusion, etc
+                - Separate section for enhancements
+                - Pseudo Codes in Tables
+            5. Check for Error Handling section, content should be available within this section.
+            6. Check for Security Requirements/Authorization Details section, content should be available within this section.
+            7. Check for EXISTING Unit Test Plan section, content should be available within this section.
+            8. Check for Interactive Report/Fiori/UI5 Application Flow section, content should be available within this section.
+            9. Check for General Information,  within this section you should check for below things:
+                - WRICEF ID, Description, Process owner, TS System Date, Module
+            
+           
+            When the verification is done return 'TERMINATE'. 
+            """,
+        llm_config=llm_config,
+    )
+
+    user_proxy = ConversableAgent(
+        name="user_proxy",
+        human_input_mode="TERMINATE",
+        is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
+        code_execution_config=False,
+        max_consecutive_auto_reply = 3,
+    )
+
+    user_proxy.initiate_chat(
+        Tester, message="Read the generated TSD and thena verify it by given parameters. Return the parameters which were not satisfied by the TSD.")
+    
+    user_proxy.stop_reply_at_receive(Tester)
+    user_proxy.send(
+        "Give me a list of parameter that the generated result did not verify, return ONLY the list. Then save the list in a text file locally", Tester)
+
+    # return the last message the expert received
+    return user_proxy.last_message()["content"]
+    

@@ -1,1 +1,6 @@
 venv/
+OAI_CONFIG_LIST.json
+.cache
+__pycache__
+.env
+TSD.docx
