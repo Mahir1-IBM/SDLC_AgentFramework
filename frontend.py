@@ -1,36 +1,54 @@
-
 import streamlit as st
 import asyncio
 import warnings
 
-from TSDGenerator import TSDGenerator
+from TSDGenerator import TSDGenerator  
 from testingTSD import testing
-
 from autogen import config_list_from_json, ConversableAgent
 
 warnings.filterwarnings("ignore")
 
-config_list = config_list_from_json(
-    env_or_file="OAI_CONFIG_LIST.json"
-)
+config_list = config_list_from_json(env_or_file="OAI_CONFIG_LIST.json")
 
 llm_config_intra_agent = {
     "functions": [
         {
             "name": "TSDGenerator",
-            "description": "Function for generating the Techincal Specification Document (TSD). It returns the generated TSD as text"
+            "description": "Function for generating the Techincal Specification Document (TSD). It returns the generated TSD as text",
+            "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "type": "string",
+                            "description": "The user id of the user.",
+                        },
+                        "tsd_type": {
+                            "type": "string",
+                            "description": "The type of TSD to be generated : initial or final.",
+                        },
+                        "WRICEF_type": {
+                            "type": "string",
+                            "description": "The type of WRICEF to be used : Reports or Enhancements or Interfaces.",
+                        },
+                        "input_file_path": {
+                            "type": "string",
+                            "description": "The path where FSD is stored.",
+                        },
+                    },
+                "required": ["user_id", "tsd_type", "WRICEF_type", "input_file_path"],
+            },
         },
         {
             "name": "testing",
             "description": "For verification of the Techincal Specification Document (TSD). It returns a list of parmeters/filters which generated TSD lacked",
             "parameters": {
-                "type": "object",
-                "properties": {
-                    "data": {
-                        "type": "string",
-                        "description": "TSD in text form when available",
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string",
+                            "description": "TSD in text form when available",
+                        },
                     },
-                },
                 "required": ["data"],
             },
         },
@@ -38,7 +56,7 @@ llm_config_intra_agent = {
     "config_list": config_list
 }
 
-st.set_page_config(page_title="Intra Output Chat app", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="Intra Output Chat App", page_icon="🤖", layout="wide")
 
 st.title("Intra Output Agent")
 
@@ -51,7 +69,6 @@ class TrackableAssistantAgent(ConversableAgent):
                 st.markdown(message)
         return super()._process_received_message(message, sender, silent)
 
-
 class TrackableUserProxyAgent(ConversableAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message(sender.name):
@@ -61,44 +78,55 @@ class TrackableUserProxyAgent(ConversableAgent):
                 st.markdown(message)
         return super()._process_received_message(message, sender, silent)
 
+# Sidebar for inputs
+st.sidebar.title("Input Details")
 
-config_list = config_list_from_json(env_or_file="OAI_CONFIG_LIST.json")
+# IBM ID input
+ibm_id = st.sidebar.text_input("IBM ID")
 
-llm_config = {
-    "config_list": config_list,
-    "timeout": 120,
-    "seed": 42, 
-    "temperature": 0, 
-}
+# TSD type dropdown
+tsd_type = st.sidebar.selectbox("TSD Type", ["Initial", "Final"])
 
+# WRICEF type dropdown
+wricef_type = st.sidebar.selectbox("WRICEF Type", ["REPORTS", "INTERFACES", "ENHANCEMENTS"])
+
+# File uploader
+uploaded_file = st.sidebar.file_uploader("Upload a document file", type=["txt", "docx", "pdf"])
+
+# Generate TSD button
+generate_button = st.sidebar.button("Generate TSD")
+
+# Main container for displaying results
 with st.container():
-    user_input = st.text_input("User Input")
-    if user_input:
+    if generate_button:
+        if not ibm_id:
+            st.error("Please enter your IBM ID.")
+        elif not uploaded_file:
+            st.error("Please upload a document file.")
+        else:           
+            assistant = TrackableAssistantAgent(
+                name="IntraAgent",
+                system_message="Download the TSD (Techincal Specification Document) by using the TSDGenerator function. Use the parameters given in the message. Then return the list of parameters that the generated TSD is failing at, by using the testing function.Reply TERMINATE when your task is done",
+                llm_config=llm_config_intra_agent
+            )
 
-        assistant = TrackableAssistantAgent(
-            name="IntraAgent",
-            system_message="Download the TSD (Techincal Specification Document) by using the TSDGenerator function. Then return the list of parameters that the generated TSD is failing at, by using the testing function.Reply TERMINATE when your task is done",
-            llm_config=llm_config_intra_agent
-        )
+            user_proxy = TrackableUserProxyAgent(
+                name="user",
+                system_message="Use the parameters given and send them to the IntraAgent to be used to generate the TSD. Get the list of parameters which are not satisfied by TSD, use testing funciton",
+                human_input_mode="NEVER",
+                is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
+                function_map={
+                    "TSDGenerator": TSDGenerator,
+                    "testing": testing,
+                }
+            )
 
-        user_proxy = TrackableUserProxyAgent(
-            name="user",
-            human_input_mode="NEVER",
-            is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
-            function_map={
-                "TSDGenerator": TSDGenerator,
-                "testing": testing,
-            }
-        )
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+            async def initiate_chat():
+                await user_proxy.a_initiate_chat(assistant, message=f"Generate the TSD using the parameters, that are  user_id = {ibm_id},  tsd_type = {tsd_type},  WRICEF_type = {wricef_type}, input_file_path = 'FS RDD0304 - QM _Batch Genealogy Report V1.0 report.docxFS RDD0304 - QM _Batch Genealogy Report V1.0 report.docx'. After generation verify the TSD using testing function.")
 
-        async def initiate_chat():
-            await user_proxy.a_initiate_chat(assistant, message=user_input)
-
-        loop.run_until_complete(initiate_chat())
-
-
+            loop.run_until_complete(initiate_chat())
 
 st.stop()

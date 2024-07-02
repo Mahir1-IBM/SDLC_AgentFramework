@@ -3,11 +3,12 @@ import requests
 from typing_extensions import Annotated
 
 def check_status_and_download_docx(
+        user_id: Annotated[str, "The user id of the user."],
         output_path: Annotated[str, "The path where the generated TSD is saved locally."]
     ) -> int:
-    # status_url = 'https://tech-spec-generation-tech-spec-gen-dev.tech-spec-gen-dev-7825badf9e223e8d936f579788da7514-0000.us-south.containers.appdomain.cloud/get-status?user_id=Mahir.Jain1%40ibm.com'
+    # status_url = f'https://tech-spec-generation-tech-spec-gen-dev.tech-spec-gen-dev-7825badf9e223e8d936f579788da7514-0000.us-south.containers.appdomain.cloud/get-status?user_id={user_id}'
 
-    status_url = "http://127.0.0.1:8000/get-status?user_id=Mahir.Jain1%40ibm.com"
+    status_url = f"http://127.0.0.1:8000/get-status?user_id={user_id}"
     while True:
         response_status = requests.post(status_url, headers={'accept': 'application/json'}, data='')
         
