@@ -13,7 +13,7 @@ llm_config = {
     "timeout" : 120
 }
 
-def testing(
+async def testing(
         data : Annotated[str, "TSD data that needs to be verified."],
     ) -> str:
     Tester = AssistantAgent(
@@ -52,10 +52,10 @@ def testing(
 
     user_proxy = ConversableAgent(
         name="user_proxy",
-        human_input_mode="TERMINATE",
+        human_input_mode="NEVER",
         is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
         code_execution_config=False,
-        max_consecutive_auto_reply = 3,
+        max_consecutive_auto_reply = 1,
     )
 
     user_proxy.initiate_chat(
@@ -63,7 +63,7 @@ def testing(
     
     user_proxy.stop_reply_at_receive(Tester)
     user_proxy.send(
-        "Give me a list of parameter that the generated result did not verify, return ONLY the list. Then save the list in a text file locally", Tester)
+        "Give me a list of parameter that the generated result did not verify, with a proper explaination of each point.", Tester)
 
     # return the last message the expert received
     return user_proxy.last_message()["content"]

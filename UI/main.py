@@ -1,27 +1,16 @@
 import warnings
-import sys
+import streamlit as st
 
+import Application/TSDGenerator.py as TSDGenerator
 from TSDGenerator import TSDGenerator
 from testingTSD import testing
 from autogen import ConversableAgent, config_list_from_json
 
-# Create a log file and redirect stdout and stderr to this file
-log_file = open("agent_logs.txt", "a")
-sys.stdout = log_file
-sys.stderr = log_file
-
-
 warnings.filterwarnings("ignore")
 
 config_list = config_list_from_json(
-    env_or_file = "OAI_CONFIG_LIST.json"
+    env_or_file="OAI_CONFIG_LIST.json"
 )
-
-llm_config = {
-    "config_list" : config_list, 
-    "timeout" : 120
-}
-
 
 llm_config_intra_agent = {
     "functions": [
@@ -33,20 +22,19 @@ llm_config_intra_agent = {
             "name": "testing",
             "description": "For verification of the Techincal Specification Document (TSD). It returns a list of parmeters/filters which generated TSD lacked",
             "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "data": {
-                            "type": "string",
-                            "description": "TSD in text form when available",
-                        },
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "string",
+                        "description": "TSD in text form when available",
                     },
+                },
                 "required": ["data"],
             },
         },
     ],
     "config_list": config_list
 }
-
 
 IntraAgent = ConversableAgent(
     name="IntraAgent",
@@ -63,7 +51,24 @@ user_proxy = ConversableAgent(
     }
 )
 
-user_proxy.initiate_chat(
-    IntraAgent, message= f"Generate the TSD and verify it.")
+st.title("TSD Generation and Verification")
 
-log_file.close()
+if st.button("Generate and Verify TSD"):
+    user_proxy.initiate_chat(IntraAgent, message="Generate the TSD and verify it.")
+
+    with st.spinner('Generating and verifying TSD...'):
+        while True:
+            response = user_proxy.auto_reply(IntraAgent)
+            if response == "TERMINATE":
+                break
+
+    st.success('TSD Generation and Verification Completed')
+    
+    # Display results from the TSD generation and verification
+    result = IntraAgent.history[-1]  # Assuming the last message contains the verification result
+    st.write("Verification Result:", result)
+
+    # Save the verification result to a log file
+    with open('verification_result.log', 'w') as f:
+        f.write(result)
+

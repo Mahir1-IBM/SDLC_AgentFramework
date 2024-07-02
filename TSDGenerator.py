@@ -25,9 +25,7 @@ def TSDGenerator() -> str:
         name="user_proxy",
         human_input_mode="NEVER",
         system_message="Interact with TSD_bot and get the TSD as docx document. Make sure the TSD is downloaded locally and store it in /Users/mahir/Desktop/Agents/Application. Do not ask for the code but the document itself.",
-        max_consecutive_auto_reply=5,
-        # llm_config=llm_config,
-        # code_execution_config=False
+        max_consecutive_auto_reply=2,
     )
 
     TSD_bot.register_for_llm(name="get_section_mapping_and_upload_file", description="Posting the request for genertaing the TSD by uploading rewuired files.")(get_section_mapping_and_upload_file)
