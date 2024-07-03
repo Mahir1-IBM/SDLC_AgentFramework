@@ -10,7 +10,6 @@ config_list = config_list_from_json(
     env_or_file = "OAI_CONFIG_LIST.json"
 )
 
-
  
 def TSDGenerator(
         user_id: Annotated[str, "The user id of the user."],
