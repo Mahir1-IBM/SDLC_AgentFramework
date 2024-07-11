@@ -1,6 +1,5 @@
 import os
 import autogen
-
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -9,7 +8,18 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain import PromptTemplate
 from langchain_openai import AzureChatOpenAI
+import agentops
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
+
+# Initialize AgentOps
+AGENTOPS_API_KEY = os.getenv("AGENTOPS_API_KEY")
+if not AGENTOPS_API_KEY:
+    raise ValueError("AGENTOPS_API_KEY not found in environment variables")
+
+agentops.init(AGENTOPS_API_KEY)
 
 os.environ["AZURE_OPENAI_API_KEY"] = "ba3bfb17a7b5470295ec96431d4b07c0"
 os.environ["AZURE_OPENAI_ENDPOINT"] = "https://openai-dtt-cic-sj.openai.azure.com"
@@ -18,42 +28,35 @@ os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"] = "gpt4-32k"
 
 temp_dir = "/Users/mahir/Desktop/Agents/Application/codingProject"
 
+@agentops.record_function('initialize_model_and_executor')
+def initialize_model_and_executor():
+    model = AzureChatOpenAI(
+        openai_api_version=os.environ["AZURE_OPENAI_API_VERSION"],
+        azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"],
+    )
 
-model = AzureChatOpenAI(
-    openai_api_version=os.environ["AZURE_OPENAI_API_VERSION"],
-    azure_deployment=os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"],
-)
+    executor = LocalCommandLineCodeExecutor(
+        timeout=500,  
+        work_dir=temp_dir,  
+    )
+    return model, executor
 
-executor = LocalCommandLineCodeExecutor(
-    timeout=500,  
-    work_dir=temp_dir,  
-)
+model, executor = initialize_model_and_executor()
 
-
+@agentops.record_function('scrape')
 def scrape(url: str):
-    # scrape website, and also will summarize the content based on objective if the content is too large
-    # objective is the original objective & task that user give to the agent, url is the url of the website to be scraped
-
     print("Scraping website...")
-    # Define the headers for the request
     headers = {
         'Cache-Control': 'no-cache',
         'Content-Type': 'application/json',
     }
-
-    # Define the data to be sent in the request
     data = {
         "url": url
     }
-
-    # Convert Python object to JSON string
     data_json = json.dumps(data)
-
-    # Send the POST request
     response = requests.post(
         "https://chrome.browserless.io/content?token=2db344e9-a08a-4179-8f48-195a2f7ea6ee", headers=headers, data=data_json)
 
-    # Check the response status code
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
         text = soup.get_text()
@@ -66,7 +69,7 @@ def scrape(url: str):
     else:
         print(f"HTTP request failed with status code {response.status_code}")
 
-
+@agentops.record_function('summary')
 def summary(content):
     text_splitter = RecursiveCharacterTextSplitter(
         separators=["\n\n", "\n"], chunk_size=10000, chunk_overlap=500)
@@ -88,10 +91,9 @@ def summary(content):
     )
 
     output = summary_chain.run(input_documents=docs,)
-
     return output
 
-
+@agentops.record_function('research')
 def research(query):
     llm_config_researcher = {
         "functions": [
@@ -140,15 +142,22 @@ def research(query):
 
     user_proxy.initiate_chat(researcher, message=f"here's the url to scrape : {query}")
 
-    # set the receiver to be researcher, and get a summary of the research report
     user_proxy.stop_reply_at_receive(researcher)
     user_proxy.send(
         "Give me a list of parameter from the generated result, return ONLY the list", researcher)
 
-    # return the last message the expert received
     return user_proxy.last_message()["content"]
 
+@agentops.record_function('main')
+def main():
+    url = 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'
+    result = research(url)
+    print("here is the parameter list: ", result)
 
-url = 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'
-result = research(url)
-print("here is the parameter list: ", result)
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        agentops.log_error(str(e))
+    finally:
+        agentops.end_session('Success')
