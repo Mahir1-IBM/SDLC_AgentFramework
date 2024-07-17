@@ -92,7 +92,7 @@ def summary(content):
     return output
 
 
-def research(query):
+def research(query) -> str:
     llm_config_researcher = {
         "functions": [
             {
@@ -132,6 +132,7 @@ def research(query):
         code_execution_config={"executor": executor, "last_n_messages" : 2},
         is_termination_msg=lambda x: x.get("content", "") and x.get(
             "content", "").rstrip().endswith("TERMINATE"),
+        max_consecutive_auto_reply=2,
         human_input_mode="TERMINATE",
         function_map={
             "scrape": scrape,
@@ -146,8 +147,9 @@ def research(query):
         "Give me a list of parameter from the generated result, return ONLY the list", researcher)
 
     # return the last message the expert received
-    return user_proxy.last_message()["content"]
-
+    result = user_proxy.last_message()["content"]
+    print("here is the parameter list: ", result)
+    return result
 
 url = 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'
 result = research(url)

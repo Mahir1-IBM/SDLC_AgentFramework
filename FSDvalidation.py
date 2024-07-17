@@ -1,7 +1,6 @@
 import warnings
 
 from typing_extensions import Annotated
-from ibm_docx_parser import extract_text
 from autogen import ConversableAgent, config_list_from_json, AssistantAgent
 warnings.filterwarnings("ignore")
 
@@ -19,18 +18,68 @@ def testingFSD(
     ) -> str:
     Tester = AssistantAgent(
         name="Agent_to_verify_FSD",
-        system_message=f"""Here is the FSD : {data}, verify if it follows the rules : 
-                A functional specification document is like a roadmap for building software. It breaks down what the software should do and how. 
-                Introduction: Explain the main reason for the project. What problem does it aim to solve, or what new capabilities will it offer? Briefly describe the intended audience for this software.
-                Scope: Define what’s included in the project, and clearly state any items or areas that will not be addressed in this phase.
-                Objectives: List the specific, measurable targets for the project. Describe the results that will indicate success, and ensure they align with broader business needs.
-                Functional requirements: Describe, in detail, each specific action or task the software must enable users to perform. Include the expected response or outcome from the system for each function.
-                Non-functional requirements: Describe the practical requirements of the software: how fast it should respond, what security measures are required, how user-friendly it should be, whether it needs to be upgraded in the work or.
-                User stories or use cases: Define the performance standards, security protocols, desired level of user-friendliness, and the ability to handle updates seamlessly.
-                Wireframes or mockups: Include detailed sketches, diagrams, or mockups to illustrate the proposed layout, product routing, and overall design aesthetic of the user interface.
-                Acceptance criteria: Set up clear and verifiable criteria for determining whether the software meets the defined requirements and stakeholder expectations.
-                Assumptions and constraints: List any assumptions that might affect the project plan related to technology or resources availability. Identify any potential factors that may limit or influence the project’s execution (e.g., budget, timeline, external dependencies).
-            
+        system_message=f"""Here is the FSD : {data}, verify if it follows these rules :               
+                "General Information": [
+                    "General information",
+                    "General Object Overview",
+                    "Purpose of this document"
+                ],
+                "DESCRIPTION AND PURPOSE": [
+                    "Process Requirements Reference",
+                    "Purpose of this document",
+                    "Business Benefit",
+                    "Business Requirement & High-Level Process Flow",
+                    "Justification",
+                    "scope",
+                    "Overview",
+                    "Business Driver",
+                    "DESCRIPTION AND PURPOSE"
+                ],
+                "ASSUMPTIONS": [
+                    "Assumptions",
+                    "Assumptions and Dependencies",
+                    "Key Assumptions"
+                ],
+                "List of Custom_Developed Primary Object": [],
+                "Selection Screen": [
+                    "Selection Screen",
+                    "Selection Criteria:"
+                ],
+                "Technical Details": [
+                    "scope",
+                    "Generic WRICEF Descriptions",
+                    "Reporting (operational and analytical)",
+                    "Development Description",
+                    "FUNCTIONAL DESCRIPTION / DESIGN",
+                    "Object Specific Design",
+                    "Report Fields",
+                    "Report Output/Display",
+                    "Customs Table for Customs Duty - ZOTC_CUSTOMSDUTY"
+                ],
+                "Interactive Report/Fiori/UI5 Application Flow": [
+                    "Flow of Screens/Logic/Data"
+                ],
+                "Calculations and Page Break Related Information": [
+                    "Report Structure & Sorting"
+                ],
+                "Error Handling": [
+                    "Error Handling"
+                ],
+                "Security Requirements/Authorization Details": [
+                    "AUTHORIZATION REQUIREMENTS",
+                    "Security & Authorization",
+                    "Security Requirements "
+                ],
+                "Additional Information and Attachments": [
+                    "Alternate Solutions Evaluated"
+                ],
+                "Unit Test Plan": [
+                    "Testing Scenarios",
+                    "Functional Test Cases",
+                    "Test Conditions",
+                    "Reporting (operational and analytical)"
+                ]
+            Check these headings which are the keys and check for the sub headings that are the values.
             When the verification is done return 'TERMINATE'. 
             """,
         llm_config=llm_config,
@@ -49,7 +98,7 @@ def testingFSD(
     
     user_proxy.stop_reply_at_receive(Tester)
     user_proxy.send(
-        "Give me a list of parameter that the generated result did not verify, with a proper explaination of each point.", Tester)
+        "Give me a list of headings and sub headings that the generated result do not have, with a proper explaination of each point.", Tester)
 
     # return the last message the expert received
     return user_proxy.last_message()["content"]

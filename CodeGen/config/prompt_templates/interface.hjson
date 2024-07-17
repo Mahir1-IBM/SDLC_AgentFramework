@@ -1,0 +1,239 @@
+MODULE_GENERATION_PROMPT: '''Your task is to decompose a set of SAP ABAP Interface requirements into distinct, manageable modules and submodules. Each module must be well-defined, containing specific submodules detailing individual functionalities or behaviors. These modularized components will serve as the foundation for subsequent code generation. You will receive a technical specification outlining various aspects of the Interface's functionality or behavior. Identify discrete functional areas within each requirement and clearly define them as modules and submodules. Each module should cover a broad functional area, while each submodule should focus on a specific functionality or behavior. Provide concise and clear descriptions for each module and submodule to facilitate easy understanding and utilization for code generation. Ensure all input requirements are integrated into the output, maintaining clarity and specificity. 
+Generate the modules in a sequential order in order to resolve the dependencies.Strictly Ensure you will cover each and everything from the SAP ABAP Interface requirements into the output JSON , nothing should be missed from detailed technical approaches and implementation steps, technical details, /Pseudo Logic/Pseudo Code etc. from the given requirements. Each and every technical details should be covered into your output JSON . Every JSON element should be complete in itself.
+Do not provide any module or submodule related to documentation.
+1. If some modules are highly dependent on each other and their SAP ABAP code can't be generated independently, then merge the highly dependent modules into a single module to resolve dependencies.
+2. Generate all possible indepenedent modules as seperate modules.
+3. Do not provide any module or submodule related to below categories
+    - Documentation 
+    - Authorization and Security
+    - Error Handling
+    - Sending RFC Response or RFC Response Handling any module related RFC Response.
+    - Receiving RFC
+'''
+
+FEW_SHOT_EXAMPLES : '''The output should strictly adhere to the  below valid  JSON format.
+
+For example 
+
+
+[  {
+    "module_name": "",
+    "description": "",
+    "submodules": [
+        {
+        "submodule_name": "",
+        "description": "",
+        }
+        
+    ]
+    },
+    {
+    "module_name": "",
+    "description": "",
+    "submodules": 
+    [
+        
+        "submodule_name": "",
+        "description": ""
+        
+    ]  
+    }
+    
+]
+'''
+
+
+CODE_GENERATION_PROMPT_GENERAL : '''You will get modules and submodule details in JSON as well as the complete SAP Interface Requirements. You are expert that you can easily extract the requirements belonging to given Modules and Submodules based on the description of Modules and Submodules provided to you in JSON, from the given SAP Interface Requirements.
+Generate the ABAP code step by step for every Module and submodule given to you in JSON, strictly do not generate the code for the requirements which does not belong to given Module and Submodules . 
+Strictly do not provide template methods , do not provide dummy implementations without code. Please provide the complete code while providing Methods Implementation. Ensure syntax and logic should always be correct.
+Strictly Do not assume any custom function already exist, there will be no custom function already existing , you have to strictly implement the custom functions if you are utlizing any one in the code.
+Strictly Do not use SELECT/SELECT SINGLE or EXIT inside LOOP statement.Strictly instead of using `SELECT *`, specify the explicit fields you need in the `SELECT` statement to improve performance.
+Strictly do not generate placeholder logic for actual code implementation, please provide actual code. 
+Strictly optimize the generated code by merging submodules into minimum number of logical methods to reduce redundancy. Generated Code should be optimized. Syntax should be correct.
+Logic and syntax of the code should be correct . Logic should be optimized , for example if you can handle a validation check with while retrieving the data in SQL statement , there may not be need to write additional logic to handle the validation.
+SELECT statement inside LOOP must not be used due to performance issues.
+Please strictly follow the below instructions while generating the code:
+
+Instructions:
+
+1. Strictly do not use SELECT statement inside a LOOP statement. SELECT statement inside LOOP must not be used due to performance issues.
+2. Strictly do not use SELECT SINGLE statement inside a LOOP statement.SELECT statment inside LOOP must not be used due to performance issues.
+3. Strictly use WHERE clause in SQL to filter the records or any validations checks mentioned in the requirement.
+4. Strictly instead of using `SELECT *`, specify the explicit fields you need in the `SELECT` statement to improve performance.
+5. As a good practice, after all select queries and read statement 
+     'IF SY-SUBRC EQ 0.' check must be implemented which verifies if the last statement execution was successful.
+6. Strictly do not use 'IS INITIAL' inside a SELECT statement as its invalid syntax.
+7. Strictly do not provide template methods, provide complete actual abap code implementation in the methods.
+8. Do not assume that any custom classes, custom function module or custom methods already exists. There will be no custom function already existing. Strictly ensure that if you use any custom objects, provide its detailed implementation as well. 
+9. Do not use any functions/methods or any components, which do not exist in SAP system, like standard components. For example CL_ABAP_LOG  does not exist in SAP system. 
+Use your SAP ABAP programming knowledge.
+10. When utilizing SAP standard objects (like bapi, function module, interface), strictly ensure correct standard parameters usage according to SAP ABAP guidelines. For example When utilizing the  MASTER_IDOC_DISTRIBUTE function module in your ABAP program, ensure that you pass the appropriate parameters for seamless execution. Keep the following points in mind:
+  - Data Preparation: Ensure that the data you intend to pass to the function module is correctly structured and populated.
+  - Error Handling: Implement robust error handling mechanisms to address any exceptions or errors that may arise during function module execution. Strictly use TRY CATCH to handle the exceptions.
+11. Strictly Ensure Adherence to SAP ABAP guidelines regarding any standard SAP function module/class method usage. For example, strictly Do not use gui_upload method to access files in the AL11 directory. Instead, use appropriate methods like OPEN DATASET.
+12. Adhere to best practices for ABAP coding, including error handling, logging, authorization checks, and performance optimization.
+13. Do not give any explanations with SAP ABAP code.
+14. Do not use any unused variables.
+15. Check the method declaration to ensure that the parameters are correctly defined based on their usage (IMPORTING, EXPORTING, CHANGING, RETURNING).
+For example , If a parameter is only used in the CHANGING clause, remove any IMPORTING or EXPORTING clause related to that parameter in the method declaration.
+Ensure that the method call matches the method declaration, using parameters appropriately.
+16. Use below Output format
+
+```ABAP
+
+actual abap  code
+```
+'''
+
+
+
+TYPE_SPECIFIC_INSTRUCTIONS :'''
+31. Encapsulate the code in the form of classes and methods.Ensure each method contains complete and functional ABAP code without placeholders.
+32. You have been given SAP object and its naming convention below in JSON format. Use this naming convention to name the custom SAP objects by adding given corresponding prefixes for the SAP objects you are using while generating the code
+    {{
+    "Report": "YGTPTR_*",
+    "Table": "8GTT_*",
+    "Data Element": "YGTPT_",
+    "function module": "YGT_*",
+    "function group": "YGTPT_*",
+    "structure": "YGTPTS_*",
+    "table type(standard)": "YGTPTT_*",
+    "table type(sorted)": "YGTPTS_*",
+    "table type(hashed)": "YGTPTH_*",
+    "method": null,
+    "Domain": "YGTPT_*",
+    "Tables": "GTT",
+    "Transaction Code": "YGTPT00_*",
+    "Translatable Objects (SE63 text) - OTR (GENERAL TEXT)": "YGTPTGT_*",
+    "Translatable Objects (SE63 text) - OTR (TEXT MODULE)": "YGTPTTM_*",
+    "Smart forms": "YGTPTSF_*",
+    "Smart styles": "YGTPTSS_*",
+    "Text modules": "YGTPTTM_*",
+    "Search Helps(Elementary)": "YGTPTE_*",
+    "Search Helps(Collective)": "YGTPTC_*",
+    "SAP Interactive Forms by Adobe(FORM)": "YGTPTFPF_*",
+    "SAP Interactive Forms by Adobe(interface)": "YGTPTFPI_*",
+    "Logical Database": "YGTPT_*",
+    "Layout sets": "YGT*",
+    "Implicit Enhancement": "YGTPTI_*",
+    "BADI Definition name": "BD_YGTPT_*",
+    "Business Add-Ins (BAdI) Class": "CL_IM_YGT_*",
+    "Business Add-Ins (BAdI) Name of the implementation": "YGT_*",
+    "Append Structures": "YGTPTS_*",
+    "Application log objects": "YGTPT_*",
+    "Dialog Modules": "YGTPT_*",
+    "Enhancement Spot": "YGTPT_*",
+    "Enhancement Implementation": "YGTPT_*",
+    "Explicit Enhancements": "YGTPTE_*",
+    "Interfaces (ABAP OO)": "IF_YGTPT_*"
+    }}
+    For example, if a new custom table similar to BKPF  is created in the code, the name of the table will be "8GTT_BKPF"
+33. For ABAP code implementation of interface, just define and implement the interface using function modules or classes. Do not implement the REPORT to call these interfaces.
+34. Strictly Do not provide JSON in the output formatStrictly use below Output format, this is just example for reference for format only
+
+    ```ABAP
+
+    actual abap  code
+
+    ```
+'''
+
+MERGING_PROMPT : '''You will be given WRICEF Interface requirements as well as the modular codes in the form of classes and methods for the same requirements. Your task is to generate a wrapper interface function module that will initialize and utilize all classes (defined within modules) along with all their methods to execute required functionalities in a logical sequence as per the requirements.
+1. Ensure the wrapper function module contains complete ABAP code without placeholders/comments. Strictly, do not provide Pseudo logic but provide complete actual ABAP code. Include basic error handling where necessary.
+2. Strictly ensure code syntax is correct and code is compilable along the given code.
+3. Strictly ensure that method parameters in the method declaration precisely match those used in the method implementation.
+4. You have been given different types of SAP objects and their naming convention prefixes in the JSON format below. Use them to name your custom SAP objects by appending the given corresponding prefixes while using them in your generated code:
+    {{
+    "Interface": "YGTPTR_*",
+    "Table": "8GTT_*",
+    "Data Element": "YGTPT_",
+    "function module": "YGT_*",
+    "function group": "YGTPT_*",
+    "structure": "YGTPTS_*",
+    "table type(standard)": "YGTPTT_*",
+    "table type(sorted)": "YGTPTS_*",
+    "table type(hashed)": "YGTPTH_*",
+    "method": null,
+    "Domain": "YGTPT_*",
+    "Tables": "GTT",
+    "Transaction Code": "YGTPT00_*",
+    "Translatable Objects (SE63 text) - OTR (GENERAL TEXT)": "YGTPTGT_*",
+    "Translatable Objects (SE63 text) - OTR (TEXT MODULE)": "YGTPTTM_*",
+    "Smart forms": "YGTPTSF_*",
+    "Smart styles": "YGTPTSS_*",
+    "Text modules": "YGTPTTM_*",
+    "Search Helps(Elementary)": "YGTPTE_*",
+    "Search Helps(Collective)": "YGTPTC_*",
+    "SAP Interactive Forms by Adobe(FORM)": "YGTPTFPF_*",
+    "SAP Interactive Forms by Adobe(interface)": "YGTPTFPI_*",
+    "Logical Database": "YGTPT_*",
+    "Layout sets": "YGT*",
+    "Implicit Enhancement": "YGTPTI_*",
+    "BADI Definition name": "BD_YGTPT_*",
+    "Business Add-Ins (BAdI) Class": "CL_IM_YGT_*",
+    "Business Add-Ins (BAdI) Name of the implementation": "YGT_*",
+    "Append Structures": "YGTPTS_*",
+    "Application log objects": "YGTPT_*",
+    "Dialog Modules": "YGTPT_*",
+    "Enhancement Spot": "YGTPT_*",
+    "Enhancement Implementation": "YGTPT_*",
+    "Explicit Enhancements": "YGTPTE_*",
+    "Interfaces (ABAP OO)": "IF_YGTPT_*"
+    }}
+For example, if a new custom Function Module similar to "BAPI_ACC_DOCUMENT_POST" is created in the generated code, the name of this custom Function Module can be "YGT_BAPI_ACC_DOCUMENT_POST".
+For ABAP code implementation of interface, just define and implement the interface using function modules or classes. Do not implement the Interface to call these interfaces.
+5. Strictly do not provide JSON in the output format.Strictly use below Output format, this is just example for reference for format only
+
+    ```ABAP
+
+    actual abap  code
+
+    ```
+'''
+
+
+Optimization_Prompt :  '''You are expert SAP ABAP Programmer,You will be given SAP ABAP code for Interface requirements . Your task is to optimize the entire code given to you by eliminating duplicate functionality only..
+Please provide the complete code functionality, strictly do not skip or miss any logic given in the ABAP code, you must consider all the classes and corresponding methods while doing optimization. 
+Write a single class named 'YCL_CUSTOMINTERFACE'(class name shhould be in uppercase). Implement all methods and attributes within the class, strictly provide the complete ABAP code ,If the original code already had implementations for methods, strictly include those as well.
+Ensure that every method name in class 'YCL_CUSTOMINTERFACE' is no longer than 30 characters, it should be short(For example  Method name join_sales_order_and_billing_data must be avoided as it has 33 characters length it should be compressed to join_sales_billing to keep it short).
+Once you optimized the code into the class 'YCL_CUSTOMINTERFACE', then also create a Wrapper interface function module that will initialize and utilize the class 'YCL_CUSTOMINTERFACE'  along with all their methods to execute required functionalities in a logical sequence as per the requirements(Strictly avoid same method call multiple times ) .
+Ensure the Wrapper function module contains complete ABAP code without  any placeholders/comments. Strictly, do not provide Pseudo logic but provide complete actual ABAP code.
+Make any necessary adjustments if required, to the method parameters declaration only(IMPORTING, EXPORTING, CHANGING, RETURNING) to ensure they can be called correctly from the Wrapper Function.
+Logic and syntax of the code should be correct. Logic should be optimized ,for example if you can handle a validation check with while retrieving the data in SQL statement , there may not be need to write additional logic to handle the validation.
+Strictly ensure entire logic needed in the Wricef Interface Requirements is available in Wrapper Function.
+You can merge multiple methods into one for optimization purpose. SELECT or SELECT SINGLE SQL inside LOOP must not be used due to performance issues.
+
+
+
+1. Optimization Focus, Identify and eliminate redundant logic and duplicate code.Ensure the optimized code is clean, efficient.
+    Identify Redundancies: Locate instances of duplicate method implementations or method calls across multiple classes.Ensure each method has only one implementation.Refactor Code:Remove redundant logic.Consolidate duplicate methods into a single implementation.
+    Write a single class named 'YCL_CUSTOMINTERFACE' (class name shhould be in uppercase). Implement all methods and attributes within the class, strictly provide the complete ABAP code with fully implemented methods. If the original code already had implementations for methods, strictly include those as well.
+ 
+    - Strictly generate all the given components classes,methods and their implementations without any placeholders with their optimized version.
+    - Strictly instead of using `SELECT *`, specify the explicit fields you need in the `SELECT` statement to improve performance.
+    - Strictly do not use SELECT statement inside a LOOP statement. SELECT statment inside LOOP must not be used due to performance issues.
+    - Strictly do not use SELECT SINGLE statement inside a LOOP statement. SELECT SINGLE inside LOOP must not be used due to performance issues.
+    - Strictly do not use Nested SQL in the entire code.
+    - Strictly do not use 'IS INITIAL' inside a SELECT statement as its invalid syntax. 
+    - As a good practice, after all SELECT queries and read statement 
+     'IF SY-SUBRC EQ 0.' check must be implemented which verifies if the last statement execution was successful.
+    - Strictly use WHERE clause in SQL to filter the records or any validations checks mentioned in the requirement.
+    - Strictly very important from Wrapper Function you must call all the methods of class YCL_CUSTOMINTERFACE, do not skip any method execution(method calls can be nested for optimization purpose).
+    - Striclty do not omit any implementation details for brevity in Wrapper Function Module, strictly provide complete code in Wrapper Function . 
+    - Signature of the Wrapper function should be as per give Wricef Interface Requiremnts. Use the correct return type for Wrapper Function . Instead of using return type as 'Boolean' use 'ABAP_BOOL'.You need to ensure all the inputs from External System(RFC call to the SAP system) will come via Input Parameters to Wrapper function as per given Wricef Interface Requirements.
+    - Logic of the code should correct and optimized.
+
+
+Refactor Code:Remove redundant logic.Consolidate duplicate methods into a single implementation.
+Maintain Functionality:Ensure that the optimized code remains clean, efficient, and maintains the same functionality as before.
+2. Maintain Functionality do not alter the core logic or functionality of the provided ABAP code.
+3. All existing features and operations must work exactly as they do in the original code.
+4. Complete Code Coverage ,Review and optimize every section of the provided code.Ensure no part of the code or logic is skipped or omitted.Do not exclude any classes, methods.
+5. Strictly do not provide any placeholders for methods, provide complete actual abap code copying from original given abap code.
+ Use below Output format
+
+```ABAP
+
+actual abap  code
+```
+'''

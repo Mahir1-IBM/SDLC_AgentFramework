@@ -1,0 +1,234 @@
+MODULE_GENERATION_PROMPT: '''Your task is to decompose a set of SAP ABAP Enhancement requirements into distinct, manageable modules and submodules. Each module must be well-defined, containing specific submodules detailing individual functionalities or behaviors. These modularized components will serve as the foundation for subsequent code generation. You will receive a technical specification outlining various aspects of the Enhancement's functionality or behavior. Identify discrete functional areas within each requirement and clearly define them as modules and submodules. Each module should cover a broad functional area, while each submodule should focus on a specific functionality or behavior. Provide concise and clear descriptions for each module and submodule to facilitate easy understanding and utilization for code generation. Ensure all input requirements are integrated into the output, maintaining clarity and specificity. 
+Generate the modules in a sequential order in order to resolve the dependencies..Strictly Ensure you will cover each and everything from the SAP ABAP Enhancement requirements into the output JSON , nothing should be missed from detailed technical approaches and implementation steps, technical details, /Pseudo Logic/Pseudo Code etc. from the given requirements. Each and every technical details should be covered into your output JSON . Every JSON element should be complete in itself.
+Do not provide any module or submodule related to documentation.
+1. If some modules are highly dependent and their SAP ABAP code can't be generated independently, then merge the highly dependent modules into a single module to resolve dependencies.
+2. Try to generate all possible indepenednt modules as seperate modules.'''
+
+FEW_SHOT_EXAMPLES: '''The output should strictly adhere to the below valid JSON format.
+
+For example 
+
+[  {
+    "module_name": "",
+    "description": "",
+    "submodules": [
+        {
+        "submodule_name": "",
+        "description": "",
+        }
+        
+    ]
+    },
+    {
+    "module_name": "",
+    "description": "",
+    "submodules": 
+    [
+        
+        "submodule_name": "",
+        "description": ""
+        
+    ]  
+    }
+    
+]
+'''
+
+CODE_GENERATION_PROMPT_GENERAL: '''You will receive a JSON structure containing modules and submodules , description, requirements, technical approach and implementation steps and technical details , classes, methods, parameters etc. of SAP ABAP WRICEF Enhancement requirements also the dependent code. Your task is to generate SAP ABAP code based on the given modularized structure of SAP ABAP WRICEF Enhancement requirements strictly according to given requirements and Implementation Steps and Technical Details etc. given in context. You can refer the dependent code, if required to generate the code.
+For the given module read the requirements carefully line by line, each module and submodule contains specific descriptions and guidelines that must be followed to create comprehensive and functional ABAP code strictly according to given requirements.
+Strictly do not provide any template methods, do not provide dummy implementations without code, Please provide the complete code while providing Methods Implementation. Ensure syntax and logic should always be correct. Do not use examples, provide the actual code. Please provide actual code for each mdule and submodule, Do not provide a json structure of the code. If standard SAP ABAP tables are given in the requirement, strictly use them as it is in the code. Do not use custom tables unless explicitly mentioned in the requirement. Strictly do not use 'EXIT' statement inside any LOOP, instead use Flag to Avoid 'EXIT'. Instead of modifying the internal table directly in the loop, collect the changes and then update the table in one step. Do not use any specific component which belongs to REPORT for example- Selection Screen, REPORT zics_block_handling should not be part of enhancement. Strictly Do not generate any kind of selection screen parameters.
+Strictly do not generate placeholder logic for actual code implementation, please provide actual code. Convert the pseudo code or pseudo logic if any provided in the JSON structure to actual ABAP code for the given module or submodule.
+Do not assume any custom function already exist, there will be no custom function already existing , you have to strictly implement the custom functions if you are utlizing any one in the code.
+Please strictly follow the below instructions while generating the code:
+
+Instructions:
+
+1. Ensure that the code follows the formatting principles of object-oriented programming which means code should be embedded in the form of classes and methods.
+2. Strictly ensure entire code syntax is correct and code is compilable. Syntax of ABAP SQL query should be correct. Please optimize the generated code by merging submodules to reduce redundancy.
+   - Use the 'INTO CORRESPONDING FIELDS OF' clause to map and populate fields from the database table into corresponding ABAP structure wherever applicable.
+   - Use '@' before ABAP variables in SELECT queries to indicate them as variables in the WHERE clause, and in INSERT, UPDATE, and DELETE statements to specify values or conditions based on ABAP variables.
+   - Strictly ensure that the Method name length must not exceed 30 characters.
+3. For each module and submodule, generate the corresponding ABAP code that implements the described functionality strictly according to given requirements and Implementation Steps in the given context.
+4. Strictly do not generate any template methods or placeholder logic or placeholder logic without code, provide the complete implementation of the code within methods strictly as per given requirements and Implementation Steps in the given context. Do not use examples, provide the actual code.
+5. It is recommended to use SAP provided standard Function Modules and BAdI only in your coding. Still, if you use any custom Function Modules and BAdI, request you to:
+  - implement full logic for these custom objects. Don't just create placeholder for them without code implementation.
+  - provide any required manual steps for these custom objects as footnote after your final coding.
+6. Do not assume any custom classes, custom function or custom methods already exists. Strictly Ensure If you use any custom components , provide its detailed implementation as well. Do not use any standard functions/methods or any components which do not exist in SAP system for example CL_ABAP_LOG  does not exist in SAP system. Use your SAP ABAP programming knowledge.
+7. Strictly do not use 'EXIT' statement inside any LOOP, instead use Flag to Avoid 'EXIT'. Instead of modifying the internal table directly in the loop, collect the changes and then update the table in one step. Do not use any specific component which belongs to REPORT for example- Selection Screen, REPORT zics_block_handling should not be part of enhancement. Strictly Do not generate any kind of selection screen parameters.
+8. When utilizing SAP standard functions like BAPI, strictly ensure correct standard parameters usage according to SAP ABAP guidelines. for example When utilizing the  BAPI_COSTACTPLN_POSTPRIMCOST function module in your ABAP program, ensure that you pass the appropriate parameters for seamless execution. Review the function module's documentation to determine the exact parameters required for successful operation. Keep the following points in mind:
+  - Parameter Review: Carefully examine the function module's documentation to identify the parameters it expects.
+  - Data Preparation: Ensure that the data you intend to pass to the function module is correctly structured and populated.
+  - Error Handling: Implement robust error handling mechanisms to address any exceptions or errors that may arise during function module execution. Strictly use TRY CATCH to handle the exceptions.
+9. Strictly Ensure Adherence to SAP ABAP guidelines regarding any standard SAP Methods/functions/classes  usage. For example, strictly Do not use gui_upload method to access files in the AL11 directory. Instead, use appropriate methods like OPEN DATASET.
+10. Adhere to best practices for ABAP coding, including error handling, logging, authorization checks, and performance optimization.
+11. Please provide complete implementation for the methods in the generated code. Do not provide any method without complete code implementation. Do not generate Templates for Methods. Convert the pseudo code or pseudo logic if any provided in the JSON structure to actual ABAP code for the given module or submodule. Do not use examples, provide the actual code.
+12. Use the SAP standard objects along with their fields/parameters if you have proper knowledge about them. Don't assume any object in case you don't have sufficient knowledge about these standard objects & their components.
+13. Instead of using `IN` operator directly with values, use a range table to pass these values during data selection from any table. For example, 
+    Step 1: Define a range table: A range table is a standard table with a specific structure.
+    Step 2: Populate the range table: Fill the range table with the required values.
+    Step 3: Use the range table in the SELECT statement.
+14. Do not use inline data declarations during parameterization.
+15. Do not give any detailed explanation with SAP ABAP code.
+16. You have been given SAP object and its naming convention below. Use this naming convention to name the new SAP objects by adding given corresponding prefixes for the new SAP objects you are using while generating the code
+    {{
+    "Report": "YGTPTR_*",
+    "Table": "8GTT_*",
+    "Data Element": "YGTPT_",
+    "function module": "YGT_*",
+    "function group": "YGTPT_*",
+    "structure": "YGTPTS_*",
+    "table type(standard)": "YGTPTT_*",
+    "table type(sorted)": "YGTPTS_*",
+    "table type(hashed)": "YGTPTH_*",
+    "method": null,
+    "Domain": "YGTPT_*",
+    "Tables": "GTT",
+    "Transaction Code": "YGTPT00_*",
+    "Translatable Objects (SE63 text) - OTR (GENERAL TEXT)": "YGTPTGT_*",
+    "Translatable Objects (SE63 text) - OTR (TEXT MODULE)": "YGTPTTM_*",
+    "Smart forms": "YGTPTSF_*",
+    "Smart styles": "YGTPTSS_*",
+    "Text modules": "YGTPTTM_*",
+    "Search Helps(Elementary)": "YGTPTE_*",
+    "Search Helps(Collective)": "YGTPTC_*",
+    "SAP Interactive Forms by Adobe(FORM)": "YGTPTFPF_*",
+    "SAP Interactive Forms by Adobe(interface)": "YGTPTFPI_*",
+    "Logical Database": "YGTPT_*",
+    "Layout sets": "YGT*",
+    "Implicit Enhancement": "YGTPTI_*",
+    "BADI Definition name": "BD_YGTPT_*",
+    "Business Add-Ins (BAdI) Class": "CL_IM_YGT_*",
+    "Business Add-Ins (BAdI) Name of the implementation": "YGT_*",
+    "Append Structures": "YGTPTS_*",
+    "Application log objects": "YGTPT_*",
+    "Dialog Modules": "YGTPT_*",
+    "Enhancement Spot": "YGTPT_*",
+    "Enhancement Implementation": "YGTPT_*",
+    "Explicit Enhancements": "YGTPTE_*",
+    "Interfaces (ABAP OO)": "IF_YGTPT_*"
+    }}
+    For example, if a new custom table similar to BKPF  is created in the code, the name of the table will be "8GTT_BKPF" 
+17. Strictly do not use the syntax 'TYPE TABLE OF' ('TYPE TABLE OF' is not supported in the method definition) instead only use syntax 'TYPE' to declare the parameters in methods definition.
+'''
+
+TYPE_SPECIFIC_INSTRUCTIONS: '''
+17. Identify the enhancement point:
+   - Specify the user exit, BADI (Business Add-In), or enhancement spot where the enhancement will be implemented. Do not use any specific component which belongs to REPORT for example- Selection Screen, REPORT zics_block_handling should not be part of enhancement.
+   - Provide the technical details, such as program names, include names, and method names.
+   - Strictly Do not generate any kind of selection screen parameters.
+   - Strictly do not use EXIT statement inside USEREXIT/BADI.
+   - Do not use any FUNCTIONS to check if enhancement is active. Do not assume that the activation of the user exit is done via a custom function. To check if enhancement is active please use only a standard METHOD. Please refer to this example:
+   [CLASS zcl_enhancement_check IMPLEMENTATION.
+
+  METHOD check_enhancement_active.
+    DATA: lv_active TYPE abap_bool VALUE abap_false.
+
+    TRY.
+        " Check if the enhancement spot is active
+        CALL METHOD cl_enh_implementation_badi=>is_enh_spot_active
+          EXPORTING
+            iv_enh_spot_name = iv_spot
+          RECEIVING
+            rv_active = lv_active.
+      CATCH cx_enh_spot .
+        lv_active = abap_false.
+    ENDTRY.
+
+    rv_active = lv_active.
+  ENDMETHOD.
+
+ENDCLASS.]
+
+18. Define the enhancement logic:
+   - Describe the functional requirement that the enhancement aims to fulfill.
+   - Outline the technical changes needed to implement the requirement.
+19. Implement the enhancement:
+   - Write the necessary ABAP code to implement the enhancement.
+   - Ensure the code adheres to best practices and coding standards.
+   - Instead of using `IN` operator directly with values, use a range table to pass these values during data selection from any table. For example, 
+    Step 1: Define a range table: A range table is a standard table with a specific structure.
+    Step 2: Populate the range table: Fill the range table with the required values.
+    Step 3: Use the range table in the SELECT statement.
+   - Use the SAP standard objects along with their fields/parameters if you have proper knowledge about them. Don't assume any object in case you don't have sufficient knowledge about these standard objects & their components.
+20. Implement the main logic:
+   - Identify and implement relevant BADI or USER EXITS that are applicable. 
+   - If you are implementing BADI then User exits can be ignored and vice versa. 
+   - Use "RETURN" or "CONTINUE" instead of "EXIT" for more explicit and maintainable control flow statement as part of good coding practice.
+   - Strictly do not use 'EXIT' statement inside any LOOP, instead use Flag to Avoid 'EXIT'.
+   - Instead of modifying the internal table directly in the loop, collect the changes and then update the table in one step.
+21. Handle exceptions and errors:
+   - Implement error handling logic to manage any issues that arise from the enhancement.
+   - Strictly use TRY CATCH to handle the exceptions.
+   - Log errors for further analysis and troubleshooting.
+22. Ensure proper authorization checks are in place:
+   - Verify user authorizations relevant to the enhancement.
+   - Log unauthorized access attempts.
+23. Ensure performance optimization:
+   - Optimize the enhancement logic to improve performance if necessary.
+   - Monitor performance and adjust as needed.
+24. Ensure data consistency and integrity:
+   - Implement checks to ensure the enhancement does not compromise data consistency.
+   - Handle data synchronization issues if necessary.
+   - Ensure the generated code maintains data consistency and integrity between source and target systems.
+'''
+
+MERGING_PROMPT: '''You are an expert SAP ABAP programmer who can arrange the ABAP code snippets into a logical SAP ABAP code satisfying the SAP Enhancement requirement.You will be given several code snippets along with requirements of SAP Enhancement, but modular codes are currently not arranged logically. You need to organize these snippets into a cohesive enhancement program that covers all given requirements.
+Here are instructions to follow:
+1. Follow sequence & flow of requirements in final merged code as per original requirements.
+2. If only asked for wrapper/calling program in requirement, implement ABAP report calling the Enhancements. Else, arrange Enhancement definition & their implementation logically in final code without any wrapper program calling these Enhancements.
+3. Follow ABAP Best Practices including OOP concepts, Modularization, Error Handling, etc. for final code generation.
+4. Strictly ensure entire code syntax is correct and code is compilable. Syntax of ABAP SQL query should be correct.
+   - Use the 'INTO CORRESPONDING FIELDS OF' clause to map and populate fields from the database table into corresponding ABAP structure wherever applicable.
+   - Use '@' before ABAP variables in SELECT queries to indicate them as variables in the WHERE clause, and in INSERT, UPDATE, and DELETE statements to specify values or conditions based on ABAP variables.
+   - Strictly ensure that the Method name length must not exceed 30 characters.
+   - Strictly do not use 'EXIT' statement inside any LOOP, instead use Flag to Avoid 'EXIT'.
+   - Instead of modifying the internal table directly in the loop, collect the changes and then update the table in one step.
+5. Instead of using `IN` operator directly with values, use a range table to pass these values during data selection from any table. For example, 
+    Step 1: Define a range table: A range table is a standard table with a specific structure.
+    Step 2: Populate the range table: Fill the range table with the required values.
+    Step 3: Use the range table in the SELECT statement.
+6. Make sure the final SAP Enhancement code satisfies all the given requirements and runs without errors.
+7. Ensure that all the given code snippets are available with proper logic in the response.
+8. Implement all logic in ABAP coding instead of creating place-holders along with comments.
+9. Do any optimization if required.
+10. You have been given SAP object and its naming convention below. Use this naming convention to name the new SAP objects by adding given corresponding prefixes for the new SAP objects you are using while generating the code
+    {{
+    "Report": "YGTPTR_*",
+    "Table": "8GTT_*",
+    "Data Element": "YGTPT_",
+    "function module": "YGT_*",
+    "function group": "YGTPT_*",
+    "structure": "YGTPTS_*",
+    "table type(standard)": "YGTPTT_*",
+    "table type(sorted)": "YGTPTS_*",
+    "table type(hashed)": "YGTPTH_*",
+    "method": null,
+    "Domain": "YGTPT_*",
+    "Tables": "GTT",
+    "Transaction Code": "YGTPT00_*",
+    "Translatable Objects (SE63 text) - OTR (GENERAL TEXT)": "YGTPTGT_*",
+    "Translatable Objects (SE63 text) - OTR (TEXT MODULE)": "YGTPTTM_*",
+    "Smart forms": "YGTPTSF_*",
+    "Smart styles": "YGTPTSS_*",
+    "Text modules": "YGTPTTM_*",
+    "Search Helps(Elementary)": "YGTPTE_*",
+    "Search Helps(Collective)": "YGTPTC_*",
+    "SAP Interactive Forms by Adobe(FORM)": "YGTPTFPF_*",
+    "SAP Interactive Forms by Adobe(interface)": "YGTPTFPI_*",
+    "Logical Database": "YGTPT_*",
+    "Layout sets": "YGT*",
+    "Implicit Enhancement": "YGTPTI_*",
+    "BADI Definition name": "BD_YGTPT_*",
+    "Business Add-Ins (BAdI) Class": "CL_IM_YGT_*",
+    "Business Add-Ins (BAdI) Name of the implementation": "YGT_*",
+    "Append Structures": "YGTPTS_*",
+    "Application log objects": "YGTPT_*",
+    "Dialog Modules": "YGTPT_*",
+    "Enhancement Spot": "YGTPT_*",
+    "Enhancement Implementation": "YGTPT_*",
+    "Explicit Enhancements": "YGTPTE_*",
+    "Interfaces (ABAP OO)": "IF_YGTPT_*"
+    }}
+    For example, if a new custom table similar to BKPF  is created in the code, the name of the table will be "8GTT_BKPF"
+11. Strictly do not use the syntax 'TYPE TABLE OF' ('TYPE TABLE OF' is not supported in the method definition) instead only use syntax 'TYPE' to declare the parameters in methods definition.
+'''

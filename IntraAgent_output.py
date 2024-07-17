@@ -2,7 +2,7 @@ import warnings
 
 from TSDGenerator import TSDGenerator
 from testingTSD import testing
-from autogen import ConversableAgent, config_list_from_json
+from autogen import ConversableAgent, config_list_from_json, AssistantAgent, GroupChat, GroupChatManager
 
 
 warnings.filterwarnings("ignore")
@@ -14,6 +14,26 @@ config_list = config_list_from_json(
 llm_config = {
     "config_list" : config_list, 
     "timeout" : 120
+}
+
+llm_config_scraping_agent = {
+    "functions": [
+        {
+            "name": "research",
+            "description": "For verification of the Techincal Specification Document (TSD). It returns a list of parmeters/filters which generated TSD lacked",
+            "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string",
+                            "description": "Website that should be scraped to get information and parameters for TSD.",
+                        },
+                    },
+                "required": ["url"],
+            },
+        },
+    ],
+    "config_list": config_list
 }
 
 
@@ -71,9 +91,17 @@ IntraAgent = ConversableAgent(
     llm_config=llm_config_intra_agent
 )
 
+TestingAgent = AssistantAgent(
+    name="IntraScrapingAgent",
+    system_message="Verify the TSD (Techincal Specification Document) by using the Scraping function and then return the list of parameters that the generated TSD is failing at. Use this URL : 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'. Reply TERMINATE when your task is done",
+    llm_config=llm_config_scraping_agent
+)
+
+
 user_proxy = ConversableAgent(
     name="user_proxy",
     system_message="Use the parameters given and send them to the IntraAgent to be used to generate the TSD. Get the list of parameters which are not satisfied by TSD, use testing funciton",
+    max_consecutive_auto_reply= 2,
     human_input_mode="TERMINATE",
     function_map={
         "TSDGenerator": TSDGenerator,
@@ -81,6 +109,19 @@ user_proxy = ConversableAgent(
     }
 )
 
-user_proxy.initiate_chat(
-    IntraAgent, message= f"Generate the TSD using the parameters, that are user_id = 'Mahir.Jain1@ibm.com', tsd_type = 'Initial', WRICEF_type = 'report', input_file_path = 'FS RDD0304 - QM _Batch Genealogy Report V1.0 report.docx'. After generation verify the TSD using testing function.")
 
+# group_chat = GroupChat(
+#     agents=[user_proxy, TestingAgent, IntraAgent], messages=[], max_round=12
+# )
+# manager = GroupChatManager(groupchat=group_chat, llm_config=llm_config)
+
+
+user_proxy.initiate_chat(
+    IntraAgent, message= f"Generate the TSD using the parameters, that are user_id = 'Mahir.Jain1@ibm.com', tsd_type = 'Initial', WRICEF_type = 'report', input_file_path = 'FS RDD0304 - QM _Batch Genealogy Report V1.0 report.docx'. After generation verify the TSD using testing function and Testing Agent as well.")
+
+user_proxy.stop_reply_at_receive(IntraAgent)
+user_proxy.send(
+    "Here is the list of parameters that the TSD is following, verify it it is indeed following them or not.", TestingAgent)
+
+# return the last message the expert received
+print(user_proxy.last_message()["content"])
