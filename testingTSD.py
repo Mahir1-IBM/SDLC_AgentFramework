@@ -51,7 +51,7 @@ async def testing(
     )
 
     user_proxy = ConversableAgent(
-        name="user_proxy",
+        name="user_proxy_tester",
         human_input_mode="NEVER",
         is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
         code_execution_config=False,

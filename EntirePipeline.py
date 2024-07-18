@@ -18,30 +18,6 @@ llm_config = {
     "timeout" : 120
 }
 
-llm_config_scraping_agent = {
-    "functions": [
-        {
-            "name": "verification_Scraping",
-            "description": "For verification of the Techincal Specification Document (TSD). It returns a list of parmeters/filters which generated TSD lacked",
-            "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "data": {
-                            "type": "string",
-                            "description": "TSD data that needs to be verified.",
-                        },
-                        "params": {
-                            "type": "string",
-                            "description": "List of parameters that TSD does not verify",
-                        },
-                    },
-                "required": ["data", "params"],
-            },
-        },
-    ],
-    "config_list": config_list
-}
-
 
 llm_config_intra_agent = {
     "functions": [
@@ -72,19 +48,19 @@ llm_config_intra_agent = {
             },
         },
         {
-            "name": "testing",
-            "description": "For verification of the Techincal Specification Document (TSD). It returns a list of parmeters/filters which generated TSD lacked",
+            "name": "codeOutputCheck",
+            "description": "Generates the SAP ABAP Code using the TSD and also validates the code produced.",
             "parameters": {
                     "type": "object",
                     "properties": {
-                        "data": {
+                        "WRICEF_type": {
                             "type": "string",
-                            "description": "TSD in text form when available",
+                            "description": "The type of WRICEF of TSD : Reports or Enhancements or Interfaces.",
                         },
                     },
-                "required": ["data"],
+                "required": ["WRICEF_type"],
             },
-        }
+        },
     ],
     "config_list": config_list
 }
@@ -117,11 +93,7 @@ IntraAgent = ConversableAgent(
     llm_config=llm_config_intra_agent
 )
 
-TestingAgent = AssistantAgent(
-    name="IntraScrapingAgent",
-    system_message="Verify the TSD (Techincal Specification Document) by using the Scraping function and then return the list of parameters that the generated TSD is failing at. Use this URL : 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'. Reply TERMINATE when your task is done",
-    llm_config=llm_config_scraping_agent
-)
+
 
 Coder = AssistantAgent(
     name="Coder",

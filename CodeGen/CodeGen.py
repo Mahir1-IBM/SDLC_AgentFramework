@@ -3,14 +3,14 @@ import requests
 from typing_extensions import Annotated
 
 def CodeGenAPI(
-        WRICEFtype: Annotated[str, "The wricef type of the TSD."],
+        WRICEF_type: Annotated[str, "The wricef type of the TSD."],
         input_file_path: Annotated[str, "The path for the TSD."]
     ) -> str:
-
+    
 
     ####################################### SECTION MAPPING URL ###################################################
     
-    url_section_mapping = f"http://127.0.0.1:8000/section-mapping?wricef_type={WRICEFtype}"
+    url_section_mapping = f"http://127.0.0.1:8000/section-mapping?wricef_type={WRICEF_type}"
 
     headers_section_mapping = {
         'accept': 'application/json'
@@ -31,7 +31,7 @@ def CodeGenAPI(
 
     ####################################### GENERATING MODULES URL ###################################################
 
-    url_generating_module = f"http://127.0.0.1:8000/generate_modules/?wricef_type={WRICEFtype}&section_mapping={section_mapping}"
+    url_generating_module = f"http://127.0.0.1:8000/generate_modules/?wricef_type={WRICEF_type}&section_mapping={section_mapping}"
 
     headers_upload_file = {
         'accept': 'application/json'
@@ -91,7 +91,7 @@ def CodeGenAPI(
 
     ####################################### MERGE CODE URL ###################################################
 
-    url_merge = f"http://127.0.0.1:8000/merge/?wricef_type={WRICEFtype}&filename=TSD&session_id_1={status_id1}"
+    url_merge = f"http://127.0.0.1:8000/merge/?wricef_type={WRICEF_type}&filename={file_name}&session_id_1={status_id1}"
 
 
     response_merge = requests.post(url_merge, headers={'accept': 'application/json', 'Content-Type': 'application/json'}, json=code_modules)
@@ -120,6 +120,7 @@ def CodeGenAPI(
             if status_data['status'] == 'Completed':
                 print("Processing completed. Generating code...")
                 code = status_data['response']['merged_code']
+                
                 return code
             
             else:
@@ -135,4 +136,5 @@ def CodeGenAPI(
 
 
 
-# check_status_and_generateModules("Enhancement", "/Users/mahir/Desktop/Agents/Application/CodeGen/O2C_E_826_827_Product Allocation UK_TDS.docx")
+# code = CodeGenAPI("Enhancement", "/Users/mahir/Desktop/Agents/Application/CodeGen/O2C_E_826_827_Product Allocation UK_TDS.docx")
+# print(code)

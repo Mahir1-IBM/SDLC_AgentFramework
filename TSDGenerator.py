@@ -76,7 +76,7 @@ def TSDGenerator(
     )
 
     user_proxy = ConversableAgent(
-        name="user_proxy",
+        name="user_proxy_gen",
         human_input_mode="NEVER",
         system_message="Interact with TSD_bot and get the TSD as docx document. Make sure the TSD is downloaded locally and store it in /Users/mahir/Desktop/Agents/Application/TSD.docx. Do not ask for the code but the document itself.",
         max_consecutive_auto_reply=2,

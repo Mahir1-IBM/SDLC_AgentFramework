@@ -1,12 +1,11 @@
 import warnings
 
 from typing_extensions import Annotated
-from CodeGen import CodeGenAPI
 from autogen import ConversableAgent, config_list_from_json, AssistantAgent
 warnings.filterwarnings("ignore")
 
 config_list = config_list_from_json(
-    env_or_file = "../OAI_CONFIG_LIST.json"
+    env_or_file = "/Users/mahir/Desktop/Agents/Application/OAI_CONFIG_LIST.json"
 )
 
 llm_config = {
@@ -18,7 +17,7 @@ def testingCode(
         code : Annotated[str, "code in json format that needs to be verified."],
     ) -> str:
     CodeTester = AssistantAgent(
-        name="Agent_to_verify_ABAPcode",
+        name="Agent_to_verify_ABAP_code",
         system_message=f"""You are expert SAP ABAP Programmer, Your task is to decompose a set of SAP ABAP code and verify that the code must be well-defined and following these parameters given below : .
         
         Here is the SAP ABAP code : {code}, verify if it follows these guidelines :               
@@ -60,7 +59,7 @@ def testingCode(
     )
 
     user_proxy = ConversableAgent(
-        name="user_proxy",
+        name="user_proxy_val",
         system_message='''You are a human proxy. Make sure that the CodeTester verifies SAP ABAP code, from the given business requirement. Do not generate any code in your response. Make sure it returns a list''',
         human_input_mode="NEVER",
         is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
@@ -78,6 +77,5 @@ def testingCode(
     return user_proxy.last_message()["content"]
     
 
-
-code = CodeGenAPI("Enhancement", "/Users/mahir/Desktop/Agents/Application/CodeGen/O2C_E_826_827_Product Allocation UK_TDS.docx")
-print(testingCode(code))
+# code = CodeGenAPI("Enhancement", "/Users/mahir/Desktop/Agents/Application/CodeGen/O2C_E_826_827_Product Allocation UK_TDS.docx")
+# print(testingCode(code))

@@ -8,7 +8,7 @@ def check_status_and_download_docx(
     ) -> int:
     # status_url = f'https://tech-spec-generation-tech-spec-gen-dev.tech-spec-gen-dev-7825badf9e223e8d936f579788da7514-0000.us-south.containers.appdomain.cloud/get-status?user_id={user_id}'
 
-    status_url = f"http://127.0.0.1:8000/get-status?user_id={user_id}"
+    status_url = f"http://127.0.0.1:8001/get-status?user_id={user_id}"
     while True:
         response_status = requests.post(status_url, headers={'accept': 'application/json'}, data='')
         
@@ -32,8 +32,8 @@ def check_status_and_download_docx(
                 return 0
             
             else:
-                print("Processing not yet completed. Waiting for 50 seconds before checking again...")
-                time.sleep(50)
+                print("Processing not yet completed. Waiting for 60 seconds before checking again...")
+                time.sleep(60)
 
         else:
             print(f"Failed to check status. Status code: {response_status.status_code}")

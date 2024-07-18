@@ -4,11 +4,23 @@ import autogen
 import requests
 from bs4 import BeautifulSoup
 import json
+from typing import Annotated
 from autogen.coding import LocalCommandLineCodeExecutor
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain import PromptTemplate
 from langchain_openai import AzureChatOpenAI
+from autogen import ConversableAgent, config_list_from_json, AssistantAgent
+
+
+config_list = config_list_from_json(
+    env_or_file = "OAI_CONFIG_LIST.json"
+)
+
+llm_config = {
+    "config_list" : config_list, 
+    "timeout" : 120
+}
 
 
 os.environ["AZURE_OPENAI_API_KEY"] = "ba3bfb17a7b5470295ec96431d4b07c0"
@@ -148,9 +160,45 @@ def research(query) -> str:
 
     # return the last message the expert received
     result = user_proxy.last_message()["content"]
-    print("here is the parameter list: ", result)
+    # print("here is the parameter list: ", result)
+    
     return result
 
-url = 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'
-result = research(url)
-print("here is the parameter list: ", result)
+
+async def verification_Scraping(
+        data : Annotated[str, "TSD data that needs to be verified."],
+        params:  Annotated[str, "List of parameters that TSD does not verify"],
+    ) -> str:
+    
+    url = 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'
+    result = research(url)
+
+    Validator = AssistantAgent(
+        name="Agent_to_verify_TSD",
+        system_message=f"You are a very skilled AI agent. Check the {data} and then thusing the list : {result} make sure that the list of parameters that TSD did not verify : {params} are indeed correct or not. When the verification is done return 'TERMINATE'.",
+        llm_config=llm_config,
+    )
+
+    user_proxy = ConversableAgent(
+        name="user_proxy",
+        human_input_mode="NEVER",
+        is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
+        code_execution_config=False,
+        max_consecutive_auto_reply = 1,
+    )
+
+    user_proxy.initiate_chat(
+        Validator, message="Read the generated TSD and then verify the list of parameters it did not verify using your knowldge. Return the parameters which were not satisfied by the TSD.")
+    
+    user_proxy.stop_reply_at_receive(Validator)
+    user_proxy.send(
+        "Give me a list of parameter that the generated result did not verify, with a proper explaination of each point.", Validator)
+
+    # return the last message the expert received
+    return user_proxy.last_message()["content"]
+    
+
+
+# url = 'https://community.sap.com/t5/forums/searchpage/tab/message?q=TSD&collapse_discussion=true'
+# result = research(url)
+# print("here is the parameter list: ", result)

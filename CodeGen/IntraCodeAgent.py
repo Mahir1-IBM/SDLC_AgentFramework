@@ -1,7 +1,8 @@
 import warnings
 
-from CodeGen import CodeGenAPI
-from CodeValidation import testingCode
+from CodeGen.Codegen import CodeGenAPI
+from CodeGen.CodeValidation import testingCode
+from typing import Annotated
 from autogen import ConversableAgent, config_list_from_json
 
 
@@ -25,7 +26,7 @@ llm_config_intra_agent = {
             "parameters": {
                     "type": "object",
                     "properties": {
-                        "WRICEFtype": {
+                        "WRICEF_type": {
                             "type": "string",
                             "description": "The wricef type of the TSD.",
                         },
@@ -34,7 +35,7 @@ llm_config_intra_agent = {
                             "description": "The path where the TSD is stored.",
                         }
                     },
-                "required": ["WRICEFtype", "input_file_path"],
+                "required": ["WRICEF_type", "input_file_path"],
             },
         },
         {
@@ -56,27 +57,31 @@ llm_config_intra_agent = {
 }
 
 
-IntraAgent = ConversableAgent(
-    name="IntraAgent",
-    system_message="Generate the SAP ABAP code from the given Techincal Specification Document by using the CodeGenAPI function. Use the parameters given in the message. Then return the list of parameters that the generated code is failing at, by using the testingCode function. Reply TERMINATE when your task is done",
-    llm_config=llm_config_intra_agent
-)
+def codeOutputCheck(
+        WRICEF_type: Annotated[str, "The wricef type of the TSD."],
+    ) -> str:
+    
+    IntraAgent = ConversableAgent(
+        name="IntraCodeAgent",
+        system_message="Generate the SAP ABAP code from the given Techincal Specification Document by using the CodeGenAPI function. Then return the list of parameters that the generated code is failing at, by using the testingCode function. Reply TERMINATE when your task is done",
+        llm_config=llm_config_intra_agent
+    )
+
+    user_proxy = ConversableAgent(
+        name="user_proxy",
+        max_consecutive_auto_reply= 2,
+        human_input_mode="TERMINATE",
+        function_map={
+            "CodeGenAPI": CodeGenAPI,
+            "testingCode": testingCode,
+        }
+    )
+
+    user_proxy.initiate_chat(
+        IntraAgent, message= f"Generate and verify the ABAP code by the given TSD using the arguments : WRICEF_type = {WRICEF_type}; input_file_path = '/Users/mahir/Desktop/Agents/Application/TSD.docx'.")
 
 
-user_proxy = ConversableAgent(
-    name="user_proxy",
-    system_message="Use the parameters/arguments given and send them to the IntraAgent to be used for generation and validation of the ABAP code. Get the list of parameters which are not satisfied by code.",
-    max_consecutive_auto_reply= 2,
-    human_input_mode="TERMINATE",
-    function_map={
-        "CodeGenAPI": CodeGenAPI,
-        "testingCode": testingCode,
-    }
-)
+    return (user_proxy.last_message()["content"])
 
 
-user_proxy.initiate_chat(
-    IntraAgent, message= f"Generate the ABAP code by the given TSD using the arguments, that are WRICEFtype = 'Enhancement', input_file_path of TSD = 'O2C_E_826_827_Product Allocation UK_TDS.docx'. Verify the code too")
-
-
-print(user_proxy.last_message()["content"])
+# print(codeOutputCheck("Report"))

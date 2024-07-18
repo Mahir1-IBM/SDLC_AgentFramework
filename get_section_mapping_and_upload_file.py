@@ -4,7 +4,7 @@ def get_section_mapping_and_upload_file(user_id: str, tsd_type: str, WRICEF_type
     # Get section mapping URL
     
     # url_section_mapping = f'https://tech-spec-generation-tech-spec-gen-dev.tech-spec-gen-dev-7825badf9e223e8d936f579788da7514-0000.us-south.containers.appdomain.cloud/section-mapping?WRICEF_type={WRICEF_type}'
-    url_section_mapping = f'http://127.0.0.1:8000/section-mapping?WRICEF_type={WRICEF_type}'
+    url_section_mapping = f'http://127.0.0.1:8001/section-mapping?WRICEF_type={WRICEF_type}'
     headers_section_mapping = {
         'accept': 'application/json'
     }
@@ -22,7 +22,7 @@ def get_section_mapping_and_upload_file(user_id: str, tsd_type: str, WRICEF_type
     # Construct upload file URL
     
     # url_upload_file = f'https://tech-spec-generation-tech-spec-gen-dev.tech-spec-gen-dev-7825badf9e223e8d936f579788da7514-0000.us-south.containers.appdomain.cloud/uploadfile/?user_id={user_id}&tsd_type={tsd_type}&WRICEF_type={WRICEF_type}'
-    url_upload_file = f'http://127.0.0.1:8000/uploadfile/?user_id={user_id}&tsd_type={tsd_type}&WRICEF_type={WRICEF_type}'
+    url_upload_file = f'http://127.0.0.1:8001/uploadfile/?user_id={user_id}&tsd_type={tsd_type}&WRICEF_type={WRICEF_type}'
     
     headers_upload_file = {
         'accept': 'application/json'
@@ -45,7 +45,7 @@ def get_section_mapping_and_upload_file(user_id: str, tsd_type: str, WRICEF_type
     return 0
 
 # if __name__ == "__main__":
-#     # Example usage
+
 #     user_id = 'Mahir.Jain1@ibm.com'
 #     tsd_type = 'Initial'
 #     WRICEF_type = 'report'
