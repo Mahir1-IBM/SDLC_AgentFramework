@@ -1,17 +1,7 @@
-import warnings
-
 from typing_extensions import Annotated
-from autogen import ConversableAgent, config_list_from_json, AssistantAgent
-warnings.filterwarnings("ignore")
+from LLMConfig import llm_config
+from autogen import ConversableAgent, AssistantAgent
 
-config_list = config_list_from_json(
-    env_or_file = "/Users/mahir/Desktop/Agents/Application/OAI_CONFIG_LIST.json"
-)
-
-llm_config = {
-    "config_list" : config_list, 
-    "timeout" : 120
-}
 
 async def testing(
         data : Annotated[str, "TSD data that needs to be verified."],

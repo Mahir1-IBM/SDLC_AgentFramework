@@ -2,22 +2,15 @@ import time
 import asyncio
 import warnings
 from ibm_docx_parser import extract_text
+from LLMConfig import llm_config
 from typing_extensions import Annotated
-from autogen import UserProxyAgent, config_list_from_json, AssistantAgent, GroupChat, GroupChatManager
+from autogen import UserProxyAgent, AssistantAgent, GroupChat, GroupChatManager
 from autogen.cache import Cache
 
 warnings.filterwarnings("ignore")
 
 start_time = time.time()
 
-config_list = config_list_from_json(
-    env_or_file = "OAI_CONFIG_LIST.json"
-)
-
-llm_config = {
-    "config_list" : config_list, 
-    "timeout" : 120
-}
 
 data = extract_text("/Users/mahir/Desktop/Agents/Application/TSD.docx")
 

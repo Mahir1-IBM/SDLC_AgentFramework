@@ -1,17 +1,6 @@
-import warnings
-
 from typing_extensions import Annotated
-from autogen import ConversableAgent, config_list_from_json, AssistantAgent
-warnings.filterwarnings("ignore")
-
-config_list = config_list_from_json(
-    env_or_file = "OAI_CONFIG_LIST.json"
-)
-
-llm_config = {
-    "config_list" : config_list, 
-    "timeout" : 120
-}
+from autogen import ConversableAgent, AssistantAgent
+from LLMConfig import llm_config
 
 def testingFSD(
         data : Annotated[str, "FSD data that needs to be verified."],

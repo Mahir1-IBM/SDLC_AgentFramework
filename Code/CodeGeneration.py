@@ -2,7 +2,7 @@ import time
 import requests
 from typing_extensions import Annotated
 
-def CodeGenAPI(
+async def CodeGenAPI(
         WRICEF_type: Annotated[str, "The wricef type of the TSD."],
         input_file_path: Annotated[str, "The path for the TSD."]
     ) -> str:

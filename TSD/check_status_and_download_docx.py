@@ -2,6 +2,7 @@ import time
 import requests
 from typing_extensions import Annotated
 
+
 def check_status_and_download_docx(
         user_id: Annotated[str, "The user id of the user."],
         output_path: Annotated[str, "The path where the generated TSD is saved locally."]

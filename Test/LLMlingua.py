@@ -1,27 +1,14 @@
-import warnings
-
 from ibm_docx_parser import extract_text
-from TSDGenerator import TSDGenerator
-from testingTSD import testing
+from TSD.testingTSD import testing
 from dotenv import load_dotenv
 
+from LLMConfig import llm_config
 from autogen.agentchat.contrib.capabilities import transform_messages
 from autogen.agentchat.contrib.capabilities.text_compressors import LLMLingua
 from autogen.agentchat.contrib.capabilities.transforms import TextMessageCompressor
 from autogen import ConversableAgent, config_list_from_json, UserProxyAgent
 
 load_dotenv()
-warnings.filterwarnings("ignore")
-
-
-config_list = config_list_from_json(
-    env_or_file = "OAI_CONFIG_LIST.json"
-)
-
-llm_config = {
-    "config_list" : config_list, 
-    "timeout" : 120
-}
 
 data = extract_text("/Users/mahir/Desktop/Agents/Application/TSD.docx")
 
@@ -35,7 +22,7 @@ compressed_text = text_compressor.apply_transform([{"content": pdf_text}])
 
 developer = ConversableAgent(
     "assistant",
-    llm_config={"config_list": config_list},
+    llm_config=llm_config,
     max_consecutive_auto_reply=1,
     system_message = "You are a world class SAP developer that excels in creating a TSD.",
     human_input_mode="NEVER",
