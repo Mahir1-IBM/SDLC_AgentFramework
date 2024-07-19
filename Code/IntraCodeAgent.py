@@ -1,7 +1,7 @@
 import warnings
 
-from CodeGen.Codegen import CodeGenAPI
-from CodeGen.CodeValidation import testingCode
+from Code.CodeGeneration import CodeGenAPI
+from Code.CodeValidation import testingCode
 from typing import Annotated
 from autogen import ConversableAgent, config_list_from_json
 

@@ -1,13 +1,15 @@
 from typing import Annotated
-from check_status_and_download_docx import check_status_and_download_docx
-from get_section_mapping_and_upload_file import get_section_mapping_and_upload_file
 from autogen import ConversableAgent, config_list_from_json
 from langchain_community.document_loaders import PyMuPDFLoader
+
+from TSD.check_status_and_download_docx import check_status_and_download_docx
+from TSD.get_section_mapping_and_upload_file import get_section_mapping_and_upload_file
+
 from ibm_docx_parser import extract_text, extract_text_with_image_reference, get_resource, extract_text_with_base64_image
 
 
 config_list = config_list_from_json(
-    env_or_file = "OAI_CONFIG_LIST.json"
+    env_or_file = "/Users/mahir/Desktop/Agents/Application/OAI_CONFIG_LIST.json"
 )
 
  

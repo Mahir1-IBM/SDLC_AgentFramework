@@ -5,7 +5,7 @@ from autogen import ConversableAgent, config_list_from_json, AssistantAgent
 warnings.filterwarnings("ignore")
 
 config_list = config_list_from_json(
-    env_or_file = "OAI_CONFIG_LIST.json"
+    env_or_file = "/Users/mahir/Desktop/Agents/Application/OAI_CONFIG_LIST.json"
 )
 
 llm_config = {

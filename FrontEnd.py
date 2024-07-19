@@ -4,9 +4,9 @@ import warnings
 import streamlit as st
 
 from ibm_docx_parser import extract_text
-from TSDGenerator import TSDGenerator  
-from testingTSD import testing
-from FSDvalidation import testingFSD
+from TSD.TSDGenerator import TSDGenerator  
+from TSD.testingTSD import testing
+from FSD.FSDvalidation import testingFSD
 from autogen import config_list_from_json, ConversableAgent
 
 warnings.filterwarnings("ignore")
