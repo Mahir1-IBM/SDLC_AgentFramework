@@ -62,14 +62,13 @@ def codeOutputCheck(
     ) -> str:
     
     IntraAgent = ConversableAgent(
-        name="IntraCodeAgent",
+        name="IntraAgent",
         system_message="Generate the SAP ABAP code from the given Techincal Specification Document by using the CodeGenAPI function. Then return the list of parameters that the generated code is failing at, by using the testingCode function. Reply TERMINATE when your task is done",
         llm_config=llm_config_intra_agent
     )
 
     user_proxy = ConversableAgent(
         name="user_proxy",
-        max_consecutive_auto_reply= 2,
         human_input_mode="TERMINATE",
         function_map={
             "CodeGenAPI": CodeGenAPI,
