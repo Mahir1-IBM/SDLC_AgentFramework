@@ -7,8 +7,8 @@ def check_status_and_download_docx(
         user_id: Annotated[str, "The user id of the user."],
         output_path: Annotated[str, "The path where the generated TSD is saved locally."]
     ) -> int:
+    
     # status_url = f'https://tech-spec-generation-tech-spec-gen-dev.tech-spec-gen-dev-7825badf9e223e8d936f579788da7514-0000.us-south.containers.appdomain.cloud/get-status?user_id={user_id}'
-
     status_url = f"http://127.0.0.1:8001/get-status?user_id={user_id}"
     while True:
         response_status = requests.post(status_url, headers={'accept': 'application/json'}, data='')
@@ -19,14 +19,16 @@ def check_status_and_download_docx(
             print(entry['timestamp'])
             if entry['status'] == 'Completed':
                 print("Processing completed. Downloading document...")
-                pdf_link = entry['docx_link']
+                dox_link = entry['docx_link']
                 
                 # Download the document
-                docx_response = requests.get(pdf_link)
+
+                docx_response = requests.get(dox_link)
                 if docx_response.status_code == 200:
-                    with open(output_path, 'wb') as file:
-                        file.write(docx_response.content)
-                    print(f"Document downloaded successfully and saved to {output_path}")
+                    return dox_link
+                    # with open(output_path, 'wb') as file:
+                    #     file.write(docx_response.content)
+                    # print(f"Document downloaded successfully and saved to {output_path}")
                 else:
                     print(f"Failed to download the document. Status code: {docx_response.status_code}")
                 

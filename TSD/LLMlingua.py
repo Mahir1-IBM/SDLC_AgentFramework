@@ -6,7 +6,7 @@ from LLMConfig import llm_config
 from autogen.agentchat.contrib.capabilities import transform_messages
 from autogen.agentchat.contrib.capabilities.text_compressors import LLMLingua
 from autogen.agentchat.contrib.capabilities.transforms import TextMessageCompressor
-from autogen import ConversableAgent, config_list_from_json, UserProxyAgent
+from autogen import ConversableAgent, UserProxyAgent
 
 load_dotenv()
 

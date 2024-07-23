@@ -9,3 +9,4 @@ pyautogen[long-context]
 PyMuPDF
 python-dotenv
 llama-index
+pyautogui
