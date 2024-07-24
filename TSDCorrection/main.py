@@ -89,7 +89,7 @@ def CorrectionInParts(
     chat_result = UserProxy.initiate_chats(
         [
             {"recipient": manager, "message": tasks[0], "summary_method": "reflection_with_llm"},
-            {"recipient": saver, "message": tasks[1]},
+            # {"recipient": saver, "message": tasks[1]},
         ]
     )
 

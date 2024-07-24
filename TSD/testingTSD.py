@@ -1,4 +1,4 @@
-from LLMConfig import llm_config
+from TSD.LLMConfig_tsd import llm_config
 from ibm_docx_parser import extract_text
 from typing_extensions import Annotated
 from autogen import ConversableAgent, AssistantAgent

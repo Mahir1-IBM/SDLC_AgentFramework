@@ -1,0 +1,74 @@
+Document Information
+Process Area-Sub Area |  | 
+FS Definition Form ID |  | 
+Type of development |  | 
+SAP Version |  | 
+Global / Local |  | 
+
+Approval
+Approved by | Name | Role | Signature | Date | 
+ |  |  |  |  | 
+ |  |  |  |  | 
+ |  |  |  |  | 
+ |  |  |  |  | 
+
+Document History
+Version | Author | Reason for change | Date | 
+ |  |  |  | 
+ |  |  |  | 
+ |  |  |  | 
+ |  |  |  | 
+
+
+
+
+Related Documents |  |  |  | 
+ |  |  |  | 
+ |  |  |  | 
+ |  |  |  | 
+ |  |  |  | 
+
+**General Information**
+WRICEF ID | CR 41766 | 
+Description | Enhancement needed to print QM Outbound Certificates - genealogy report is used to retrieve the appropriate test results from ME. | 
+Process owner |  | 
+TS System Date | 2024-07-20 | 
+Deployment Phase |  | 
+Fiori App./Transaction(s) (if applicable) |  | 
+Package |  | 
+Message Class (if applicable) |  | 
+Module | SAP QM | 
+Enhancement User/User Group |  | 
+Run Frequency |  | 
+Language |  | 
+
+
+Transport Information
+Change Request # | Description # | Owner | 
+ |  |  | 
+ |  |  | 
+
+**Description and Purpose**
+
+Description:
+The Technical Specification (TS) document for the SAP HANA S/4 domain is designed to address the development of a custom report for Batch Genealogy. This report is to be generated for Certificate of Analysis (COA) purposes, capturing detailed batch consumption information related to Delivery and Batch. The report will fetch data from LIPS and AUFM tables to present a comprehensive view of the delivery item's batch genealogy, including the material number (MATNR), batch (CHARG), and order number (AUFNR). The TS details the logic for retrieving component batch information based on batch genealogy, where each component involved in the production of the finished product is traced through the AUFM table using the Movement type (MT) for both 261 (issue for production) and 101 (goods receipt). The report will present a single format output that includes AUFNR, MATNR, and CHARG for all materials, both the end items and components, involved in the delivery process. The TS includes the creation of a selection screen for manual report generation, where users can select the delivery number, and outlines the necessary steps for automated COA retrieval linked to specific deliveries.
+
+Purpose:
+The purpose of this Technical Specification document is to serve as a blueprint for the development team at IBM to create a custom SAP report that aligns with the business requirements specified by Gore. The document aims to bridge the gap identified in the Functional Specification (FS) document, namely the need for an efficient mechanism to produce and send out Certificates of Analysis with batch details to customers upon delivery. The TS provides the required technical details that facilitate the understanding, development, and implementation of the solution while ensuring that it remains within the scope of Gore's standard SAP products, albeit with necessary customizations. It does not delve into implementation details like database modeling or report names, as these are out of its scope. The primary goal is to ensure that Gore can verify that all business requirements have been adequately addressed and that they can approve the document with the assurance that the proposed solution meets their needs. Approval of the TS precedes the commencement of the actual development work.
+
+**Existing Assumptions**
+
+NA
+
+**Generated Assumptions**
+NA
+**Issues**
+NA
+**List of Custom Developed Primary Objects**
+Objects | Object Types | Description | Create/Change | 
+ |  |  |  | 
+ |  |  |  | 
+
+**Selection Screen**
+
+NA

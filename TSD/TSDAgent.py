@@ -1,7 +1,7 @@
 from TSD.TSDGenerator import TSDGenerator
 from TSD.testingTSD import testing
 from TSD.scraping import verification_Scraping
-from LLMConfig import llm_config_intra_agent
+from TSD.LLMConfig_tsd import llm_config_intra_agent
 from autogen import ConversableAgent
 
 IntraAgent = ConversableAgent(

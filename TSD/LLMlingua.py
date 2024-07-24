@@ -2,7 +2,7 @@ from ibm_docx_parser import extract_text
 from TSD.testingTSD import testing
 from dotenv import load_dotenv
 
-from LLMConfig import llm_config
+from TSD.LLMConfig_tsd import llm_config
 from autogen.agentchat.contrib.capabilities import transform_messages
 from autogen.agentchat.contrib.capabilities.text_compressors import LLMLingua
 from autogen.agentchat.contrib.capabilities.transforms import TextMessageCompressor

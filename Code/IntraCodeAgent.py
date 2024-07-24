@@ -2,7 +2,7 @@ from typing import Annotated
 from autogen import ConversableAgent
 from Code.CodeGeneration import CodeGenAPI
 from Code.CodeValidation import testingCode
-from LLMConfig import llm_config_code_agent
+from Code.LLMConfig_code import llm_config_code_agent
 
 
 def codeOutputCheck(

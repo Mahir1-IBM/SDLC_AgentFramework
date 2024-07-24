@@ -3,7 +3,7 @@ import time
 import pyautogui
 from typing import Annotated
 from autogen import ConversableAgent
-from LLMConfig import llm_config_tsd
+from TSD.LLMConfig_tsd import llm_config_tsd
 from TSD.check_status_and_download_docx import check_status_and_download_docx
 from TSD.get_section_mapping_and_upload_file import get_section_mapping_and_upload_file
 from ibm_docx_parser import extract_text, extract_text_with_image_reference, get_resource, extract_text_with_base64_image
