@@ -276,12 +276,16 @@ llm_config_test_2 = {
             "parameters": {
                     "type": "object",
                     "properties": {
+                        "number": {
+                            "type": "integer",
+                            "description": "Index of parameter list",
+                        },
                         "data": {
                             "type": "string",
                             "description": "TSD in text form when available",
                         },
                     },
-                "required": ["data"],
+                "required": ["number", "data"],
             },
         }
     ],
@@ -306,6 +310,54 @@ llm_config_generator = {
                         },
                     },
                 "required": ["Data", "params"],
+            },
+        }
+    ],
+    "config_list": config_list
+}
+
+llm_config_split = {
+    "functions": [
+        {
+            "name": "split_document",
+            "description": "For splitting a document into 3 equal parts. It returns three text files",
+            "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string",
+                            "description": "path of the document",
+                        }
+                    },
+                "required": ["path"],
+            },
+        }
+    ],
+    "config_list": config_list
+}
+
+llm_config_saver = {
+    "functions": [
+        {
+            "name": "create_file",
+            "description": "For reading the Technical Specification Document (TSD) given in docx format",
+            "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "Path": {
+                            "type": "string",
+                            "description": "Path of file to create.",
+                        },
+                        "number": {
+                            "type": "integer",
+                            "description": "Name of file to create.",
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "Revised TSD text to be written in the file.",
+                        },
+                    },
+                "required": ["Path", "number", "text"],
             },
         }
     ],

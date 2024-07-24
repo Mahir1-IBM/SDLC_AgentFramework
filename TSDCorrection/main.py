@@ -2,133 +2,136 @@ import os
 from typing import Annotated
 from ibm_docx_parser import extract_text
 from autogen import GroupChatManager, AssistantAgent, UserProxyAgent, GroupChat, ConversableAgent
-from TSDCorrection.testingTSD import testing
-from TSDCorrection.Functions import generating, ReadingDocx, create_file
-from LLMConfig import llm_config, llm_config_test, llm_config_test_2, llm_config_generator
+from TSDCorrection.Functions import generating, ReadingDocx, create_file, testing, split_document
+from LLMConfig import llm_config, llm_config_test, llm_config_test_2, llm_config_generator, llm_config_split, llm_config_saver
 
 default_path = "/Users/mahir/Desktop/Agents/Application/codeimprovment/"
-
-
-# reader = AssistantAgent(
-#     name="Reader",
-#     llm_config=llm_config_test,
-#     system_message="""
-#     I'm SAP Engineer. I'm expert in reading Technical Specification Documents (TSD) and I know that this document would be used to generate ABAP code, in the SDLC.
-#     """,
-# )
-
-tester = AssistantAgent(
-    name="Tester",
-    llm_config=llm_config_test_2,
-    system_message="""
-    You're a SAP Engineer. You're expert in analysing Technical Specification Documents (TSD). 
-    You will return a list of parameters using the testing function, and then pass it to the generator.
-    After 3 rounds of content iteration, add TERMINATE to the end of the message",
-    """,
-)
-
-generator = AssistantAgent(
-    name="Generator",
-    llm_config=llm_config_generator,
-    system_message="""
-    You're a SAP Engineer. You're expert in creating Technical Specification Documents (TSD) - SAP.
-    You will generate a document - TSD aligning with parameters sent by the Tester, wait for its input to get a list of verification list, use that to call generating function.
-    After 3 rounds of content iteration, add TERMINATE to the end of the message",
-    """,
-)
-
-user_proxy_bhaiya = UserProxyAgent(
-    name="UserBhaiya",
-    human_input_mode="NEVER",
-    code_execution_config=False, 
-    system_message="Interact with generator and tester, ask generator to create new TSD and tester to verfiy it. Do this multiple times",
-    function_map={
-        "testing" : testing,
-        "generating" : generating
-    },
-)
-
-user_proxy = UserProxyAgent(
-    name="Admin",
-    human_input_mode="NEVER",
-    code_execution_config={
-        "work_dir": "tasks",
-        "use_docker": False,
-    }, 
-    system_message="Interact with Engineer to helo with its task. Use tools",
-    function_map={
-        "ReadingDocx": ReadingDocx,
-        "create_file" : create_file,
-    },
-)
-
-groupchat = GroupChat(
-    agents=[user_proxy_bhaiya, tester, generator],
-    messages=[],
-    max_round=500,
-)
-manager = GroupChatManager(groupchat=groupchat, llm_config=llm_config)
 
 def get_file_path():
     current_dir = os.getcwd()
     file_path = os.path.join(current_dir, "TSD.docx")
     return file_path
 
+    
+def CorrectionInParts(
+        UserProxy : Annotated[object, "Agent to initiate chats"],
+        number: Annotated[int, "Index of parameter to be used for verification."],
+        data : Annotated[str, "TSD text data"], 
+):
+    tasks = [f"""You will need to improve the TSD : {data}, try to read it and then change it so that new TSD docx follows the parameters. Pass on the new revised TSD generated.""",
+    """After changing make sure to save it to a text file."""]
 
-params = """
-        Here is a list of parameters that the generated Technical Specification Document (TSD) did not verify, along with a detailed explanation of each point:
+    tester = AssistantAgent(
+        name="Tester",
+        llm_config=llm_config_test_2,
+        system_message= f"""
+        You're a SAP Engineer. You're expert in analysing Technical Specification Documents (TSD). 
+        Analyse the TSD received by the generator then return a list of parameters using the testing function, and then pass it to the generator.
+        Always use the number = {number} when using the testing function.
+        Do not change the TSD obtained.
+        After 2 rounds of content iteration, add TERMINATE to the end of the message",
+        """,
+    )
 
-        1. **Existing Assumptions:**
-        - **Explanation:** The TSD mentions "NA" for this section. Ideally, if there are no existing assumptions, the document should explicitly state "No existing assumptions." This provides clarity that the absence of assumptions is confirmed rather than overlooked.
+    generator = AssistantAgent(
+        name="Generator",
+        llm_config=llm_config_generator,
+        system_message="""
+        You're a SAP Engineer. You're expert in creating Technical Specification Documents (TSD) - SAP.
+        Take input a text and a list of parameters. 
+        You will generate a document - TSD aligning with parameters sent by the Tester, wait for the verification list and use that to call generating function.
+        After 2 rounds of content iteration, add TERMINATE to the end of the message",
+        """,
+    )
 
-        2. **Selection Screen:**
-        - **Explanation:** The section is marked as "NA." The TSD should clarify whether a selection screen is not required or provide detailed specifications if it is required. This ensures that the developers are aware of all user input requirements for generating the report.
+    saver = AssistantAgent(
+        name="Saver",
+        llm_config=llm_config_saver,
+        system_message=f"""
+            After obtaining the new TSD text, save it using create_file function.
+            Path = '/Users/mahir/Desktop/Agents/Application/TSDCorrection' and number = {number}, create a file.
+            Do not execute any code, only use the create_file function.
+        """,
+    )
 
-        3. **Technical Details - Function Names and Class Names:**
-        - **Explanation:** The TSD does not list specific ABAP function names or class names that would be implemented or used in the report. Providing this information is critical for developers to understand which reusable components or new classes/functions will be involved in the solution.
+    user_proxy_bhaiya = UserProxyAgent(
+        name="UserBhaiya",
+        human_input_mode="NEVER",
+        code_execution_config=False, 
+        # max_consecutive_auto_reply = 12,
+        system_message= f"""Interact with generator and tester, ask generator to create new TSD using the parameters provided and tester to verfiy it. Do this multiple times. 
+        Always use the number = {number} when using the testing function.
+        Make sure to provide the revised TSD text to saver for saving it in a text file.
+        """,
+        function_map={
+            "generating" : generating,
+            "testing" : testing,
+        },
+    )
 
-        4. **Technical Details - Important Functionalities:**
-        - **Explanation:** The TSD lacks a detailed description of important functionalities that the report should include. For instance, it should specify error checking, data validation, and any specific business logic that needs to be implemented.
+    # def state_transition(last_speaker, groupchat):
 
-        5. **Technical Details - Separate Section for Enhancements:**
-        - **Explanation:** There is no separate section that outlines potential enhancements or future scalability considerations. This section is important to foresee potential growth or additional features that might be required later.
+    #     if last_speaker is user_proxy_bhaiya:
+    #         return generator
+    #     elif last_speaker is generator:
+    #         return tester
+    #     elif last_speaker is tester:
+    #         return user_proxy_bhaiya
 
-        6. **Technical Details - Pseudo Codes in Tables:**
-        - **Explanation:** The TSD does not provide pseudo-codes or example table structures. Pseudo-codes help in understanding the essential logic flow before actual coding begins, making it easier to align with business requirements.
+    groupchat = GroupChat(
+        agents=[user_proxy_bhaiya, tester, generator],
+        messages=[],
+        speaker_selection_method="round_robin",
+        max_round=15,
+    )
+    manager = GroupChatManager(groupchat=groupchat, llm_config=llm_config)
 
-        7. **Error Handling Section:**
-        - **Explanation:** The section is labeled "NA," which is insufficient. Error handling details are crucial for any technical document to prepare for and manage unexpected scenarios and ensure the robustness of the solution.
+    chat_result = UserProxy.initiate_chats(
+        [
+            {"recipient": manager, "message": tasks[0], "summary_method": "reflection_with_llm"},
+            {"recipient": saver, "message": tasks[1]},
+        ]
+    )
 
-        8. **Security Requirements/Authorization Details Section:**
-        - **Explanation:** Labeled as "NA" with no further explanation. This section should detail the security requirements and authorization checks necessary to ensure that only authorized personnel can access or run the report.
-
-        9. **EXISTING Unit Test Plan Section:**
-        - **Explanation:** This section is incomplete or missing. A unit test plan is essential to verify that each unit of the software performs as designed. It ensures that individual parts of the application are working correctly.
-
-        10. **Interactive Report/Fiori/UI5 Application Flow Section:**
-            - **Explanation:** Marked as "NA," indicating that this section was either overlooked or deemed not necessary. If the report integrates with an interactive interface or Fiori/UI5 applications, details on the application flow are essential for implementation and user experience.
-
-        11. **General Information - Process Owner:**
-            - **Explanation:** The process owner information is missing. Identifying the process owner is important as it indicates who is responsible for the process and who can provide further clarifications or approvals.
-    """
+    return chat_result
 
 
 
-tasks = [
-    f""" Check out the TSD docx file using the {get_file_path()} """,
-    f"""You will need to improve the TSD according to {params}, try to read it and then change it so that new TSD docx follows the parameters.""",
-]
+user_proxy = UserProxyAgent(
+    name="Admin",
+    human_input_mode="NEVER",
+    is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
+    code_execution_config={
+        "work_dir": "tasks",
+        "use_docker": False,
+    }, 
+    system_message="Interact as a human admin.",
+    function_map={
+        "ReadingDocx": ReadingDocx,
+        "split_document" : split_document,
+        "create_file" : create_file,
+    },
+)
 
+splitter = AssistantAgent(
+    name="Splitter",
+    llm_config=llm_config_split,
+    system_message= "Split a document given by its path. Use split_document function. Return 'TERMINATE' after the task is completed.",
+)
+
+
+with open("TSDCorrection/part1.txt", "r") as file:
+    data = file.read().replace("\n", "")
+
+CorrectionInParts(user_proxy, 1, data)
+
+# tasks = ["Split the TSD into three parts, path = '/Users/mahir/Desktop/Agents/Application/TSD.docx.' ", 
+#         ""
+# ]
 
 # chat_result = user_proxy.initiate_chats(
 #     [
-#         {"recipient": reader, "message": tasks[0], "summary_method": "reflection_with_llm"},
-#         {"recipient": manager, "message": tasks[1]},
+#         {"recipient": splitter, "message": tasks[0], "summary_method": "reflection_with_llm"},
+#         {"recipient": manager, "message": tasks[0]},
 #     ]
 # )
-
-# print(get_file_path())
-
-
-data = extract_text("/Users/mahir/Desktop/Agents/Application/TSD.docx")
-print(data)
