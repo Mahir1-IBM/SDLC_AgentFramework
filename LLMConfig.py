@@ -175,6 +175,28 @@ llm_config_test_2 = {
                     },
                 "required": ["number", "data"],
             },
+        },
+        {
+            "name": "create_file",
+            "description": "For reading the Technical Specification Document (TSD) given in docx format",
+            "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "Path": {
+                            "type": "string",
+                            "description": "Path of file to create.",
+                        },
+                        "number": {
+                            "type": "integer",
+                            "description": "Name of file to create.",
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "Revised TSD text to be written in the file.",
+                        },
+                    },
+                "required": ["Path", "number", "text"],
+            },
         }
     ],
     "config_list": config_list

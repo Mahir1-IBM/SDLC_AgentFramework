@@ -18,8 +18,7 @@ def CorrectionInParts(
         number: Annotated[int, "Index of parameter to be used for verification."],
         data : Annotated[str, "TSD text data"], 
 ):
-    tasks = [f"""You will need to improve the TSD : {data}, try to read it and then change it so that new TSD docx follows the parameters. Pass on the new revised TSD generated.""",
-    """After changing make sure to save it to a text file."""]
+    tasks = [f"""You will need to improve the TSD : {data}, try to read it and then change it so that new TSD docx follows the parameters. Pass on the new revised TSD generated. After changing make sure to save it to a text file."""]
 
     tester = AssistantAgent(
         name="Tester",
@@ -29,7 +28,7 @@ def CorrectionInParts(
         Analyse the TSD received by the generator then return a list of parameters using the testing function, and then pass it to the generator.
         Always use the number = {number} when using the testing function.
         Do not change the TSD obtained.
-        After 2 rounds of content iteration, add TERMINATE to the end of the message",
+        After 2 rounds of content iteration, save the TSD text in a file using create_file function. Add TERMINATE to the end of the message after completion",
         """,
     )
 
@@ -40,7 +39,7 @@ def CorrectionInParts(
         You're a SAP Engineer. You're expert in creating Technical Specification Documents (TSD) - SAP.
         Take input a text and a list of parameters. 
         You will generate a document - TSD aligning with parameters sent by the Tester, wait for the verification list and use that to call generating function.
-        After 2 rounds of content iteration, add TERMINATE to the end of the message",
+        After 2 rounds of content iteration, add TERMINATE to the end of the message after completion",
         """,
     )
 
@@ -58,6 +57,7 @@ def CorrectionInParts(
         name="UserBhaiya",
         human_input_mode="NEVER",
         code_execution_config=False, 
+        is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
         # max_consecutive_auto_reply = 12,
         system_message= f"""Interact with generator and tester, ask generator to create new TSD using the parameters provided and tester to verfiy it. Do this multiple times. 
         Always use the number = {number} when using the testing function.
@@ -66,6 +66,7 @@ def CorrectionInParts(
         function_map={
             "generating" : generating,
             "testing" : testing,
+            "create_file" : create_file
         },
     )
 
@@ -88,7 +89,7 @@ def CorrectionInParts(
 
     chat_result = UserProxy.initiate_chats(
         [
-            {"recipient": manager, "message": tasks[0], "summary_method": "reflection_with_llm"},
+            {"recipient": manager, "message": tasks[0], "summary_method": "last_msg"},
             # {"recipient": saver, "message": tasks[1]},
         ]
     )
